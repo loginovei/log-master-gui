@@ -51,7 +51,7 @@ export function DashboardPage() {
       {statsError && (
         <Alert
           message="Не удалось загрузить статистику"
-          description="Проверьте, что backend запущен на порту 8080."
+          description="Не удалось подключиться к серверу."
           type="warning"
           showIcon
           style={{ marginBottom: 24 }}
