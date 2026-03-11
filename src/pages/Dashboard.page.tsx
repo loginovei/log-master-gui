@@ -7,8 +7,8 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useFetch } from '../hooks/useFetch';
-import { getStats } from '../api/logs';
-import { searchLogs } from '../api/logs';
+import { getStats, searchLogs } from '../api/logs';
+import { useAppContext } from '../context/AppContext';
 import type { LogEntry, LogLevel } from '../types';
 
 const { Title } = Typography;
@@ -39,14 +39,18 @@ const recentColumns: ColumnsType<LogEntry> = [
 ];
 
 export function DashboardPage() {
-  const { data: stats, loading: statsLoading, error: statsError } = useFetch(getStats);
+  const { selectedApp } = useAppContext();
+  const appCode = selectedApp?.code;
+  const { data: stats, loading: statsLoading, error: statsError } = useFetch(() => getStats(appCode));
   const { data: recent, loading: recentLoading } = useFetch(() =>
-    searchLogs({ page: 0, size: 10, level: 'ERROR' })
+    searchLogs({ appCode, page: 0, size: 10, level: 'ERROR' })
   );
 
   return (
     <>
-      <Title level={3} style={{ marginTop: 0 }}>Дашборд</Title>
+      <Title level={3} style={{ marginTop: 0 }}>
+        Дашборд{selectedApp ? ` — ${selectedApp.name}` : ''}
+      </Title>
 
       {statsError && (
         <Alert

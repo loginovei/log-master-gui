@@ -18,6 +18,7 @@ import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { searchTemplates } from '../api/templates';
 import { searchLogs } from '../api/logs';
+import { useAppContext } from '../context/AppContext';
 import type { LogEntry, LogLevel, LogSearchParams, LogTemplate, Page } from '../types';
 
 const { Title, Text } = Typography;
@@ -60,6 +61,7 @@ const logColumns: ColumnsType<LogEntry> = [
 ];
 
 export function LogsPage() {
+  const { selectedApp } = useAppContext();
   const [templateQuery, setTemplateQuery] = useState('');
   const [templateOptions, setTemplateOptions] = useState<{ value: string; label: string; template: LogTemplate }[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<LogTemplate | null>(null);
@@ -79,7 +81,7 @@ export function LogsPage() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const results = await searchTemplates(templateQuery);
+        const results = await searchTemplates({ q: templateQuery, appCode: selectedApp?.code });
         setTemplateOptions(
           results.map(t => ({
             value: t.logCode,
@@ -96,6 +98,7 @@ export function LogsPage() {
     setSearched(true);
     try {
       const params: LogSearchParams = {
+        appCode: selectedApp?.code,
         logCode,
         ...filters,
         page: currentPage - 1,

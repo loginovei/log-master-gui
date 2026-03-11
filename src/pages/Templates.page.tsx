@@ -16,6 +16,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, PlusCircleOutlined } from '
 import type { ColumnsType } from 'antd/es/table';
 import { useFetch } from '../hooks/useFetch';
 import { getTemplates, createTemplate, updateTemplate, deleteTemplate } from '../api/templates';
+import { useAppContext } from '../context/AppContext';
 import type { LogTemplate } from '../types';
 
 const { Title } = Typography;
@@ -36,7 +37,8 @@ function fromRecord(messages: Record<string, string>): FormMessage[] {
 }
 
 export function TemplatesPage() {
-  const { data, loading, refetch } = useFetch(() => getTemplates(0, 100));
+  const { selectedApp } = useAppContext();
+  const { data, loading, refetch } = useFetch(() => getTemplates({ appCode: selectedApp?.code }));
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<LogTemplate | null>(null);
   const [saving, setSaving] = useState(false);
@@ -62,7 +64,7 @@ export function TemplatesPage() {
     const values = await form.validateFields();
     setSaving(true);
     try {
-      const payload = { logCode: values.logCode, messages: toRecord(values.messages) };
+      const payload = { logCode: values.logCode, appCode: selectedApp?.code ?? '', messages: toRecord(values.messages) };
       if (editing) {
         await updateTemplate(editing.logCode, payload);
         message.success('Шаблон обновлён');

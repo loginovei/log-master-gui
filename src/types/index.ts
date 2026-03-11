@@ -1,8 +1,14 @@
 export type LogLevel = 'TRACE' | 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
 
+export interface Application {
+  code: string;
+  name: string;
+}
+
 export interface LogTemplate {
   id?: string;
   logCode: string;
+  appCode: string;
   messages: Record<string, string>; // { "ru": "Пользователь {0} вошёл", "en": "User {0} logged in" }
 }
 
@@ -24,6 +30,7 @@ export interface Page<T> {
 }
 
 export interface LogSearchParams {
+  appCode?: string;
   logCode?: string;
   service?: string;
   level?: LogLevel;
@@ -33,8 +40,17 @@ export interface LogSearchParams {
   size?: number;
 }
 
-export interface DashboardStats {
+export interface TemplateSearchParams {
+  appCode?: string;
+  q?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface AppStats {
   totalTemplates: number;
   totalEntries: number;
   entriesPerLevel: Partial<Record<LogLevel, number>>;
+  entriesPerService: Record<string, number>;
+  recentActivity: { date: string; count: number }[];
 }
