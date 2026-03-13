@@ -93,9 +93,15 @@ export function TemplatesPage() {
 
   const columns: ColumnsType<LogTemplate> = [
     {
+      title: 'Приложение',
+      dataIndex: 'appCode',
+      width: 200,
+      render: (v: string) => <Tag color="geekblue">{v}</Tag>,
+    },
+    {
       title: 'Код лога',
       dataIndex: 'logCode',
-      width: 200,
+      width: 160,
       render: (v: string) => <Tag color="blue">{v}</Tag>,
     },
     {
