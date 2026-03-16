@@ -19,6 +19,7 @@ export interface LogEntry {
   timestamp: string;
   service: string;
   level: LogLevel;
+  stackTrace?: string;
 }
 
 export interface Page<T> {

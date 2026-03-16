@@ -30,10 +30,29 @@ const ENTRIES: LogEntry[] = [
   { id: 'e5',  logCode: 'USER_001', params: { '0': 'eve' },                                        timestamp: '2026-05-10T08:03:20Z', service: 'user-service',  level: 'INFO'  },
   { id: 'e6',  logCode: 'USER_002', params: { '0': 'alice' },                                      timestamp: '2026-05-10T08:10:00Z', service: 'user-service',  level: 'INFO'  },
   { id: 'e7',  logCode: 'ORD_001',  params: { '0': '#1042', '1': 'alice' },                        timestamp: '2026-05-10T08:05:00Z', service: 'order-service', level: 'INFO'  },
-  { id: 'e8',  logCode: 'ORD_002',  params: { '0': '#1043', '1': 'duplicate key value' },          timestamp: '2026-05-10T08:06:45Z', service: 'order-service', level: 'ERROR' },
-  { id: 'e9',  logCode: 'ORD_002',  params: { '0': '#1044', '1': 'connection timeout' },           timestamp: '2026-05-10T08:20:00Z', service: 'order-service', level: 'ERROR' },
+  { id: 'e8',  logCode: 'ORD_002',  params: { '0': '#1043', '1': 'duplicate key value' },          timestamp: '2026-05-10T08:06:45Z', service: 'order-service', level: 'ERROR',
+    stackTrace: `org.springframework.dao.DataIntegrityViolationException: could not execute statement; SQL [n/a]; constraint [orders_pkey]
+\tat org.hibernate.exception.ConstraintViolationException.convert(ConstraintViolationException.java:96)
+\tat org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:317)
+\tat ru.loginov.order.service.OrderService.createOrder(OrderService.java:84)
+\tat ru.loginov.order.controller.OrderController.create(OrderController.java:42)
+Caused by: org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint "orders_pkey"
+\tat org.postgresql.jdbc.PgPreparedStatement.executeInternal(PgPreparedStatement.java:490)` },
+  { id: 'e9',  logCode: 'ORD_002',  params: { '0': '#1044', '1': 'connection timeout' },           timestamp: '2026-05-10T08:20:00Z', service: 'order-service', level: 'ERROR',
+    stackTrace: `java.net.SocketTimeoutException: connect timed out
+\tat java.net.PlainSocketImpl.socketConnect(Native Method)
+\tat java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:412)
+\tat ru.loginov.order.client.PaymentClient.charge(PaymentClient.java:67)
+\tat ru.loginov.order.service.OrderService.processOrder(OrderService.java:121)
+\tat ru.loginov.order.controller.OrderController.process(OrderController.java:58)` },
   { id: 'e10', logCode: 'GW_001',   params: { '0': 'GET',  '1': '/api/users',  '2': '200', '3': '45' },   timestamp: '2026-05-10T08:02:00Z', service: 'api-gateway',   level: 'INFO'  },
-  { id: 'e11', logCode: 'GW_001',   params: { '0': 'POST', '1': '/api/orders', '2': '500', '3': '1200' }, timestamp: '2026-05-10T08:06:55Z', service: 'api-gateway',   level: 'ERROR' },
+  { id: 'e11', logCode: 'GW_001',   params: { '0': 'POST', '1': '/api/orders', '2': '500', '3': '1200' }, timestamp: '2026-05-10T08:06:55Z', service: 'api-gateway',   level: 'ERROR',
+    stackTrace: `ru.loginov.gateway.exception.UpstreamException: Upstream order-service responded with HTTP 500
+\tat ru.loginov.gateway.filter.ProxyFilter.handleResponse(ProxyFilter.java:113)
+\tat org.springframework.cloud.gateway.handler.FilteringWebHandler.handle(FilteringWebHandler.java:164)
+\tat ru.loginov.gateway.filter.LoggingFilter.filter(LoggingFilter.java:55)
+Caused by: java.io.IOException: Remote host closed connection during handshake
+\tat sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:992)` },
   { id: 'e12', logCode: 'GW_002',   params: { '0': '192.168.1.10' },                               timestamp: '2026-05-10T08:30:00Z', service: 'api-gateway',   level: 'WARN'  },
   { id: 'e13', logCode: 'AUTH_002', params: { '0': 'frank' },                                      timestamp: '2026-05-10T09:00:00Z', service: 'auth-service',  level: 'WARN'  },
   { id: 'e14', logCode: 'USER_001', params: { '0': 'grace' },                                      timestamp: '2026-05-10T09:05:00Z', service: 'user-service',  level: 'INFO'  },

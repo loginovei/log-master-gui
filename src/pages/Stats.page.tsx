@@ -19,7 +19,7 @@ const LEVEL_ORDER: LogLevel[] = ['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
 export function StatsPage() {
   const { selectedApp } = useAppContext();
-  const { data: stats, loading } = useFetch(() => getStats(selectedApp?.code));
+  const { data: stats, loading } = useFetch(() => getStats(selectedApp?.code), [selectedApp?.code]);
 
   const total = stats?.totalEntries ?? 0;
 

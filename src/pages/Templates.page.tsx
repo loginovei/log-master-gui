@@ -38,7 +38,7 @@ function fromRecord(messages: Record<string, string>): FormMessage[] {
 
 export function TemplatesPage() {
   const { selectedApp } = useAppContext();
-  const { data, loading, refetch } = useFetch(() => getTemplates({ appCode: selectedApp?.code }));
+  const { data, loading, refetch } = useFetch(() => getTemplates({ appCode: selectedApp?.code }), [selectedApp?.code]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<LogTemplate | null>(null);
   const [saving, setSaving] = useState(false);

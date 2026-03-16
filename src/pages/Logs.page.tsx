@@ -6,6 +6,7 @@ import {
   Col,
   DatePicker,
   Form,
+  Modal,
   Row,
   Select,
   Space,
@@ -13,8 +14,9 @@ import {
   Tag,
   Typography,
   Divider,
+  Tooltip,
 } from 'antd';
-import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
+import { SearchOutlined, FilterOutlined, BugOutlined, CodeOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { searchTemplates } from '../api/templates';
 import { searchLogs } from '../api/logs';
@@ -34,32 +36,6 @@ const levelColors: Record<LogLevel, string> = {
 
 const levels: LogLevel[] = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
 
-const logColumns: ColumnsType<LogEntry> = [
-  {
-    title: 'Время',
-    dataIndex: 'timestamp',
-    width: 180,
-    render: (v: string) => new Date(v).toLocaleString('ru'),
-    sorter: true,
-  },
-  {
-    title: 'Уровень',
-    dataIndex: 'level',
-    width: 90,
-    render: (v: LogLevel) => <Tag color={levelColors[v]}>{v}</Tag>,
-  },
-  { title: 'Сервис',   dataIndex: 'service',  width: 160 },
-  { title: 'Код лога', dataIndex: 'logCode',  width: 180 },
-  {
-    title: 'Параметры',
-    dataIndex: 'params',
-    render: (v: Record<string, unknown>) =>
-      Object.keys(v).length ? (
-        <Text code style={{ fontSize: 12 }}>{JSON.stringify(v)}</Text>
-      ) : '—',
-  },
-];
-
 export function LogsPage() {
   const { selectedApp } = useAppContext();
   const [templateQuery, setTemplateQuery] = useState('');
@@ -70,7 +46,61 @@ export function LogsPage() {
   const [logsLoading, setLogsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [searched, setSearched] = useState(false);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [paramsEntry, setParamsEntry] = useState<LogEntry | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function toggleExpand(id: string) {
+    setExpandedKeys(keys =>
+      keys.includes(id) ? keys.filter(k => k !== id) : [...keys, id]
+    );
+  }
+
+  const logColumns: ColumnsType<LogEntry> = [
+    {
+      title: 'Время',
+      dataIndex: 'timestamp',
+      width: 180,
+      render: (v: string) => new Date(v).toLocaleString('ru'),
+      sorter: true,
+    },
+    {
+      title: 'Уровень',
+      dataIndex: 'level',
+      width: 90,
+      render: (v: LogLevel) => <Tag color={levelColors[v]}>{v}</Tag>,
+    },
+    { title: 'Сервис',   dataIndex: 'service',  width: 160 },
+    { title: 'Код лога', dataIndex: 'logCode',  width: 180 },
+    {
+      title: '',
+      key: 'actions',
+      width: 72,
+      render: (_, record) => (
+        <Space size={4}>
+          {Object.keys(record.params).length > 0 && (
+            <Tooltip title="Параметры">
+              <Button
+                size="small"
+                icon={<CodeOutlined />}
+                onClick={() => setParamsEntry(record)}
+              />
+            </Tooltip>
+          )}
+          {record.stackTrace && (
+            <Tooltip title="Stack trace">
+              <Button
+                size="small"
+                danger={expandedKeys.includes(record.id)}
+                icon={<BugOutlined />}
+                onClick={() => toggleExpand(record.id)}
+              />
+            </Tooltip>
+          )}
+        </Space>
+      ),
+    },
+  ];
 
   // Debounced template search
   useEffect(() => {
@@ -226,6 +256,28 @@ export function LogsPage() {
             rowKey="id"
             size="small"
             locale={{ emptyText: 'Записи не найдены' }}
+            expandable={{
+              showExpandColumn: false,
+              expandedRowKeys: expandedKeys,
+              onExpand: (_, record) => toggleExpand(record.id),
+              expandedRowRender: (record) => (
+                <pre style={{
+                  margin: 0,
+                  padding: '12px 16px',
+                  background: '#1a1a1a',
+                  color: '#ff7875',
+                  borderRadius: 6,
+                  fontSize: 12,
+                  lineHeight: 1.6,
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-all',
+                  fontFamily: 'monospace',
+                }}>
+                  {record.stackTrace}
+                </pre>
+              ),
+              rowExpandable: (record) => !!record.stackTrace,
+            }}
             pagination={{
               current: page,
               total: logs?.totalElements ?? 0,
@@ -239,6 +291,28 @@ export function LogsPage() {
           />
         </Card>
       )}
+
+      <Modal
+        title={`Параметры — ${paramsEntry?.logCode}`}
+        open={!!paramsEntry}
+        onCancel={() => setParamsEntry(null)}
+        footer={null}
+        width={560}
+      >
+        <pre style={{
+          margin: 0,
+          padding: '12px 16px',
+          background: '#f6f8fa',
+          borderRadius: 6,
+          fontSize: 13,
+          lineHeight: 1.6,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-all',
+          fontFamily: 'monospace',
+        }}>
+          {paramsEntry ? JSON.stringify(paramsEntry.params, null, 2) : ''}
+        </pre>
+      </Modal>
     </>
   );
 }

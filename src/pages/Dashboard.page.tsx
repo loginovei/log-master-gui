@@ -41,9 +41,9 @@ const recentColumns: ColumnsType<LogEntry> = [
 export function DashboardPage() {
   const { selectedApp } = useAppContext();
   const appCode = selectedApp?.code;
-  const { data: stats, loading: statsLoading, error: statsError } = useFetch(() => getStats(appCode));
+  const { data: stats, loading: statsLoading, error: statsError } = useFetch(() => getStats(appCode), [appCode]);
   const { data: recent, loading: recentLoading } = useFetch(() =>
-    searchLogs({ appCode, page: 0, size: 10, level: 'ERROR' })
+    searchLogs({ appCode, page: 0, size: 10, level: 'ERROR' }), [appCode]
   );
 
   return (
