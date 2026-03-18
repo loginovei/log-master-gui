@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from 'antd';
 import { SearchOutlined, FilterOutlined, BugOutlined, CodeOutlined } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
+import type { ColumnsType, ColumnType } from 'antd/es/table';
 import { searchTemplates } from '../api/templates';
 import { searchLogs } from '../api/logs';
 import { useAppContext } from '../context/AppContext';
@@ -36,6 +36,13 @@ const levelColors: Record<LogLevel, string> = {
 
 const levels: LogLevel[] = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
 
+const DEFAULT_COL_ORDER = ['time', 'level', 'service', 'logCode', 'message'];
+
+function renderMessage(template: LogTemplate, params: Record<string, unknown>): string {
+  const text = template.messages['ru'] ?? Object.values(template.messages)[0] ?? '';
+  return text.replace(/\{(\d+)\}/g, (_, i) => String(params[i] ?? `{${i}}`));
+}
+
 export function LogsPage() {
   const { selectedApp } = useAppContext();
   const [templateQuery, setTemplateQuery] = useState('');
@@ -48,7 +55,9 @@ export function LogsPage() {
   const [searched, setSearched] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [paramsEntry, setParamsEntry] = useState<LogEntry | null>(null);
+  const [colOrder, setColOrder] = useState<string[]>(DEFAULT_COL_ORDER);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dragKey = useRef<string>('');
 
   function toggleExpand(id: string) {
     setExpandedKeys(keys =>
@@ -56,25 +65,72 @@ export function LogsPage() {
     );
   }
 
-  const logColumns: ColumnsType<LogEntry> = [
-    {
+  function draggableHeader(key: string): ColumnType<LogEntry>['onHeaderCell'] {
+    return () => ({
+      draggable: true,
+      style: { cursor: 'grab', userSelect: 'none' },
+      onDragStart: () => { dragKey.current = key; },
+      onDragOver: (e: React.DragEvent) => e.preventDefault(),
+      onDrop: () => {
+        if (dragKey.current === key) return;
+        setColOrder(order => {
+          const from = order.indexOf(dragKey.current);
+          const to   = order.indexOf(key);
+          const next = [...order];
+          next.splice(to, 0, next.splice(from, 1)[0]);
+          return next;
+        });
+      },
+    });
+  }
+
+  const colDefs: Record<string, ColumnType<LogEntry>> = {
+    time: {
+      key: 'time',
       title: 'Время',
       dataIndex: 'timestamp',
       width: 180,
       render: (v: string) => new Date(v).toLocaleString('ru'),
       sorter: true,
+      onHeaderCell: draggableHeader('time'),
     },
-    {
+    level: {
+      key: 'level',
       title: 'Уровень',
       dataIndex: 'level',
       width: 90,
       render: (v: LogLevel) => <Tag color={levelColors[v]}>{v}</Tag>,
+      onHeaderCell: draggableHeader('level'),
     },
-    { title: 'Сервис',   dataIndex: 'service',  width: 160 },
-    { title: 'Код лога', dataIndex: 'logCode',  width: 180 },
+    service: {
+      key: 'service',
+      title: 'Сервис',
+      dataIndex: 'service',
+      width: 160,
+      onHeaderCell: draggableHeader('service'),
+    },
+    logCode: {
+      key: 'logCode',
+      title: 'Код лога',
+      dataIndex: 'logCode',
+      width: 160,
+      onHeaderCell: draggableHeader('logCode'),
+    },
+    message: {
+      key: 'message',
+      title: 'Сообщение',
+      dataIndex: 'params',
+      render: (params: Record<string, unknown>) =>
+        selectedTemplate ? renderMessage(selectedTemplate, params) : '—',
+      onHeaderCell: draggableHeader('message'),
+    },
+  };
+
+  const logColumns: ColumnsType<LogEntry> = [
+    ...colOrder.map(k => colDefs[k]),
     {
-      title: '',
       key: 'actions',
+      title: '',
       width: 72,
       render: (_, record) => (
         <Space size={4}>
