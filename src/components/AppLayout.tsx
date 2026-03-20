@@ -6,6 +6,7 @@ import {
   AppstoreOutlined,
   BarChartOutlined,
   AppstoreAddOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useAppContext } from '../context/AppContext';
@@ -27,7 +28,7 @@ export function AppLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const { apps, selectedApp, setSelectedApp } = useAppContext();
+  const { apps, selectedApp, setSelectedApp, selectedLang, setSelectedLang, availableLangs } = useAppContext();
 
   const siderWidth = collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH;
 
@@ -80,6 +81,17 @@ export function AppLayout() {
                 setSelectedApp(code ? (apps.find(a => a.code === code) ?? null) : null);
               }}
               options={apps.map(a => ({ value: a.code, label: a.name }))}
+            />
+          </Space>
+
+          <Space>
+            <GlobalOutlined style={{ color: '#1677ff' }} />
+            <Text type="secondary">Язык:</Text>
+            <Select
+              style={{ width: 100 }}
+              value={selectedLang}
+              onChange={setSelectedLang}
+              options={availableLangs.map(l => ({ value: l, label: l.toUpperCase() }))}
             />
           </Space>
         </Header>

@@ -38,13 +38,13 @@ const levels: LogLevel[] = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
 
 const DEFAULT_COL_ORDER = ['time', 'level', 'service', 'logCode', 'message'];
 
-function renderMessage(template: LogTemplate, params: Record<string, unknown>): string {
-  const text = template.messages['ru'] ?? Object.values(template.messages)[0] ?? '';
+function renderMessage(template: LogTemplate, params: Record<string, unknown>, lang: string): string {
+  const text = template.messages[lang] ?? Object.values(template.messages)[0] ?? '';
   return text.replace(/\{(\d+)\}/g, (_, i) => String(params[i] ?? `{${i}}`));
 }
 
 export function LogsPage() {
-  const { selectedApp } = useAppContext();
+  const { selectedApp, selectedLang, setAvailableLangs } = useAppContext();
   const [templateQuery, setTemplateQuery] = useState('');
   const [templateOptions, setTemplateOptions] = useState<{ value: string; label: string; template: LogTemplate }[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<LogTemplate | null>(null);
@@ -121,7 +121,7 @@ export function LogsPage() {
       title: 'Сообщение',
       dataIndex: 'params',
       render: (params: Record<string, unknown>) =>
-        selectedTemplate ? renderMessage(selectedTemplate, params) : '—',
+        selectedTemplate ? renderMessage(selectedTemplate, params, selectedLang) : '—',
       onHeaderCell: draggableHeader('message'),
     },
   };
@@ -168,10 +168,12 @@ export function LogsPage() {
     debounceRef.current = setTimeout(async () => {
       try {
         const results = await searchTemplates({ q: templateQuery, appCode: selectedApp?.code });
+        const langs = [...new Set(results.flatMap(t => Object.keys(t.messages)))];
+        if (langs.length) setAvailableLangs(langs);
         setTemplateOptions(
           results.map(t => ({
             value: t.logCode,
-            label: `${t.logCode} — ${t.messages['ru'] ?? Object.values(t.messages)[0] ?? ''}`,
+            label: `${t.logCode} — ${t.messages[selectedLang] ?? Object.values(t.messages)[0] ?? ''}`,
             template: t,
           }))
         );

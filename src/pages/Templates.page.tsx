@@ -37,8 +37,13 @@ function fromRecord(messages: Record<string, string>): FormMessage[] {
 }
 
 export function TemplatesPage() {
-  const { selectedApp } = useAppContext();
-  const { data, loading, refetch } = useFetch(() => getTemplates({ appCode: selectedApp?.code }), [selectedApp?.code]);
+  const { selectedApp, selectedLang, setAvailableLangs } = useAppContext();
+  const { data, loading, refetch } = useFetch(async () => {
+    const result = await getTemplates({ appCode: selectedApp?.code });
+    const langs = [...new Set(result.content.flatMap(t => Object.keys(t.messages)))];
+    if (langs.length) setAvailableLangs(langs);
+    return result;
+  }, [selectedApp?.code]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<LogTemplate | null>(null);
   const [saving, setSaving] = useState(false);
@@ -47,7 +52,7 @@ export function TemplatesPage() {
   function openCreate() {
     setEditing(null);
     form.resetFields();
-    form.setFieldsValue({ messages: [{ lang: 'ru', text: '' }] });
+    form.setFieldsValue({ messages: [{ lang: selectedLang, text: '' }] });
     setModalOpen(true);
   }
 
@@ -105,17 +110,19 @@ export function TemplatesPage() {
       render: (v: string) => <Tag color="blue">{v}</Tag>,
     },
     {
-      title: 'Шаблоны сообщений',
+      title: 'Сообщение',
       dataIndex: 'messages',
-      render: (messages: Record<string, string>) => (
-        <Space wrap>
-          {Object.entries(messages).map(([lang, text]) => (
-            <span key={lang}>
-              <Tag>{lang}</Tag>{text}
-            </span>
-          ))}
-        </Space>
-      ),
+      render: (messages: Record<string, string>) => {
+        const text = messages[selectedLang] ?? Object.values(messages)[0] ?? '—';
+        const isLangMissing = !messages[selectedLang];
+        const fallbackLang = isLangMissing ? Object.keys(messages)[0] : null;
+        return (
+          <span>
+            {isLangMissing && fallbackLang && <Tag color="warning">{fallbackLang}</Tag>}
+            {text}
+          </span>
+        );
+      },
     },
     {
       title: 'Языки',
