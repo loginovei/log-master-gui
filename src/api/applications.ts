@@ -1,9 +1,7 @@
-// GET /api/applications
-
-import client from './client';
+import { applicationsApi } from './apiClient';
 import type { Application } from '../types';
 
 export async function getApplications(): Promise<Application[]> {
-  const { data } = await client.get('/api/applications');
-  return data;
+  const { data } = await applicationsApi.findAll1();
+  return data.map(a => ({ code: a.code!, name: a.name! }));
 }

@@ -1,0 +1,670 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Log Master API",
+        "description": "API \u0441\u0438\u0441\u0442\u0435\u043c\u044b \u0446\u0435\u043d\u0442\u0440\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043d\u043e\u0433\u043e \u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u0438 \u043f\u043e\u0438\u0441\u043a\u0430 \u043b\u043e\u0433\u043e\u0432",
+        "contact": {
+            "name": "Loginov",
+            "email": "loginov@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080/log-master",
+            "description": "Generated server url"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Applications",
+            "description": "\u0420\u0435\u0435\u0441\u0442\u0440 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0439, \u0447\u044c\u0438 \u043b\u043e\u0433\u0438 \u0441\u043e\u0431\u0438\u0440\u0430\u0435\u0442 \u0441\u0438\u0441\u0442\u0435\u043c\u0430"
+        },
+        {
+            "name": "Logs",
+            "description": "\u041f\u043e\u0438\u0441\u043a \u0437\u0430\u043f\u0438\u0441\u0435\u0439 \u043b\u043e\u0433\u043e\u0432 \u0438 \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u0435 \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0438"
+        },
+        {
+            "name": "Log Templates",
+            "description": "\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c\u0438 \u043b\u043e\u0433-\u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0439"
+        }
+    ],
+    "paths": {
+        "/api/templates/{logCode}": {
+            "put": {
+                "tags": [
+                    "Log Templates"
+                ],
+                "summary": "\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c \u0448\u0430\u0431\u043b\u043e\u043d",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "logCode",
+                        "in": "path",
+                        "description": "\u041a\u043e\u0434 \u0448\u0430\u0431\u043b\u043e\u043d\u0430 \u043b\u043e\u0433\u0430",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "AUTH_001"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LogTemplateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LogTemplateResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Log Templates"
+                ],
+                "summary": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0448\u0430\u0431\u043b\u043e\u043d",
+                "operationId": "delete",
+                "parameters": [
+                    {
+                        "name": "logCode",
+                        "in": "path",
+                        "description": "\u041a\u043e\u0434 \u0448\u0430\u0431\u043b\u043e\u043d\u0430 \u043b\u043e\u0433\u0430",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "AUTH_001"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/templates": {
+            "get": {
+                "tags": [
+                    "Log Templates"
+                ],
+                "summary": "\u041f\u043e\u0441\u0442\u0440\u0430\u043d\u0438\u0447\u043d\u044b\u0439 \u0441\u043f\u0438\u0441\u043e\u043a \u0448\u0430\u0431\u043b\u043e\u043d\u043e\u0432",
+                "description": "\u0412\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u0448\u0430\u0431\u043b\u043e\u043d\u044b \u0441 \u043e\u043f\u0446\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u043e\u0439 \u0444\u0438\u043b\u044c\u0442\u0440\u0430\u0446\u0438\u0435\u0439 \u043f\u043e \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044e",
+                "operationId": "findAll",
+                "parameters": [
+                    {
+                        "name": "appCode",
+                        "in": "query",
+                        "description": "\u041a\u043e\u0434 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f \u0434\u043b\u044f \u0444\u0438\u043b\u044c\u0442\u0440\u0430\u0446\u0438\u0438",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "\u041d\u043e\u043c\u0435\u0440 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u044b (\u0441 0)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "\u0420\u0430\u0437\u043c\u0435\u0440 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u044b",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageDtoLogTemplateResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Log Templates"
+                ],
+                "summary": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0448\u0430\u0431\u043b\u043e\u043d",
+                "operationId": "create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LogTemplateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LogTemplateResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/applications": {
+            "get": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "\u0421\u043f\u0438\u0441\u043e\u043a \u0432\u0441\u0435\u0445 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0439",
+                "operationId": "findAll_1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ApplicationResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435",
+                "operationId": "create_1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/templates/search": {
+            "get": {
+                "tags": [
+                    "Log Templates"
+                ],
+                "summary": "\u041f\u043e\u043b\u043d\u043e\u0442\u0435\u043a\u0441\u0442\u043e\u0432\u044b\u0439 \u043f\u043e\u0438\u0441\u043a \u0448\u0430\u0431\u043b\u043e\u043d\u043e\u0432",
+                "description": "\u0418\u0449\u0435\u0442 \u043f\u043e \u043a\u043e\u0434\u0443 \u0448\u0430\u0431\u043b\u043e\u043d\u0430 \u0438 \u0442\u0435\u043a\u0441\u0442\u0430\u043c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0439 \u043d\u0430 \u0432\u0441\u0435\u0445 \u044f\u0437\u044b\u043a\u0430\u0445",
+                "operationId": "search",
+                "parameters": [
+                    {
+                        "name": "appCode",
+                        "in": "query",
+                        "description": "\u041a\u043e\u0434 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f \u0434\u043b\u044f \u0444\u0438\u043b\u044c\u0442\u0440\u0430\u0446\u0438\u0438",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "\u041f\u043e\u0438\u0441\u043a\u043e\u0432\u044b\u0439 \u0437\u0430\u043f\u0440\u043e\u0441 (\u0447\u0430\u0441\u0442\u044c \u043a\u043e\u0434\u0430 \u0438\u043b\u0438 \u0442\u0435\u043a\u0441\u0442\u0430 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/LogTemplateResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logs": {
+            "get": {
+                "tags": [
+                    "Logs"
+                ],
+                "summary": "\u041f\u043e\u0438\u0441\u043a \u0437\u0430\u043f\u0438\u0441\u0435\u0439 \u043b\u043e\u0433\u043e\u0432",
+                "description": "\u041f\u043e\u0441\u0442\u0440\u0430\u043d\u0438\u0447\u043d\u044b\u0439 \u043f\u043e\u0438\u0441\u043a \u0441 \u0444\u0438\u043b\u044c\u0442\u0440\u0430\u043c\u0438 \u043f\u043e \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044e, \u043a\u043e\u0434\u0443 \u043b\u043e\u0433\u0430, \u0443\u0440\u043e\u0432\u043d\u044e \u0438 \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e\u043c\u0443 \u0434\u0438\u0430\u043f\u0430\u0437\u043e\u043d\u0443",
+                "operationId": "search_1",
+                "parameters": [
+                    {
+                        "name": "appCode",
+                        "in": "query",
+                        "description": "\u041a\u043e\u0434 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "logCode",
+                        "in": "query",
+                        "description": "\u041a\u043e\u0434 \u0448\u0430\u0431\u043b\u043e\u043d\u0430 \u043b\u043e\u0433\u0430",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "AUTH_001"
+                    },
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "description": "\u0423\u0440\u043e\u0432\u0435\u043d\u044c \u043b\u043e\u0433\u0430",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ERROR"
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "\u041d\u0430\u0447\u0430\u043b\u043e \u043f\u0435\u0440\u0438\u043e\u0434\u0430 (ISO 8601)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-05-10T00:00:00Z"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "\u041a\u043e\u043d\u0435\u0446 \u043f\u0435\u0440\u0438\u043e\u0434\u0430 (ISO 8601)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-05-10T23:59:59Z"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "\u041d\u043e\u043c\u0435\u0440 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u044b (\u0441 0)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "\u0420\u0430\u0437\u043c\u0435\u0440 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u044b",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageDtoLogEntryResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logs/stats": {
+            "get": {
+                "tags": [
+                    "Logs"
+                ],
+                "summary": "\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u043f\u043e \u043b\u043e\u0433\u0430\u043c",
+                "description": "\u0412\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u0441\u0447\u0451\u0442\u0447\u0438\u043a\u0438 \u043f\u043e \u0443\u0440\u043e\u0432\u043d\u044f\u043c, \u0441\u0435\u0440\u0432\u0438\u0441\u0430\u043c \u0438 \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c \u0437\u0430 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 \u0434\u043d\u0438",
+                "operationId": "getStats",
+                "parameters": [
+                    {
+                        "name": "appCode",
+                        "in": "query",
+                        "description": "\u041a\u043e\u0434 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f (\u0435\u0441\u043b\u0438 \u043d\u0435 \u0443\u043a\u0430\u0437\u0430\u043d \u2014 \u043f\u043e \u0432\u0441\u0435\u043c)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AppStatsDto"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/applications/{code}": {
+            "get": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "\u041f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435 \u043f\u043e \u043a\u043e\u0434\u0443",
+                "operationId": "getByCode",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435 \u043f\u043e \u043a\u043e\u0434\u0443",
+                "operationId": "delete_1",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "LogTemplateRequest": {
+                "type": "object",
+                "properties": {
+                    "logCode": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "appCode": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "messages": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "minProperties": 1
+                    }
+                },
+                "required": [
+                    "appCode",
+                    "logCode",
+                    "messages"
+                ]
+            },
+            "LogTemplateResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "logCode": {
+                        "type": "string"
+                    },
+                    "appCode": {
+                        "type": "string"
+                    },
+                    "messages": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "ApplicationRequest": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "code",
+                    "name"
+                ]
+            },
+            "ApplicationResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PageDtoLogTemplateResponse": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LogTemplateResponse"
+                        }
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "LogEntryResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "logCode": {
+                        "type": "string"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "timestamp": {
+                        "type": "string"
+                    },
+                    "service": {
+                        "type": "string"
+                    },
+                    "level": {
+                        "type": "string"
+                    },
+                    "stackTrace": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PageDtoLogEntryResponse": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LogEntryResponse"
+                        }
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "AppStatsDto": {
+                "type": "object",
+                "properties": {
+                    "totalTemplates": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalEntries": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "entriesPerLevel": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    "entriesPerService": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    "recentActivity": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DailyActivity"
+                        }
+                    }
+                }
+            },
+            "DailyActivity": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            }
+        }
+    }
+}
