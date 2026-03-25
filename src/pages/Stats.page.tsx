@@ -3,6 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { useFetch } from '../hooks/useFetch';
 import { getStats } from '../api/logs';
 import { useAppContext } from '../context/AppContext';
+import { useT } from '../i18n/useT';
 import type { LogLevel } from '../types';
 
 const { Title, Text } = Typography;
@@ -19,15 +20,16 @@ const LEVEL_ORDER: LogLevel[] = ['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
 export function StatsPage() {
   const { selectedApp } = useAppContext();
+  const t = useT();
   const { data: stats, loading } = useFetch(() => getStats(selectedApp?.code), [selectedApp?.code]);
 
   const total = stats?.totalEntries ?? 0;
 
   const serviceColumns: ColumnsType<{ service: string; count: number; pct: number }> = [
-    { title: 'Сервис',   dataIndex: 'service', render: (v) => <Tag>{v}</Tag> },
-    { title: 'Записей',  dataIndex: 'count', align: 'right', width: 100 },
+    { title: t.stats.colService, dataIndex: 'service', render: (v) => <Tag>{v}</Tag> },
+    { title: t.stats.colCount,   dataIndex: 'count', align: 'right', width: 100 },
     {
-      title: 'Доля',
+      title: t.stats.colShare,
       dataIndex: 'pct',
       width: 200,
       render: (pct) => <Progress percent={pct} size="small" strokeColor="#1677ff" />,
@@ -35,8 +37,8 @@ export function StatsPage() {
   ];
 
   const activityColumns: ColumnsType<{ date: string; count: number }> = [
-    { title: 'Дата',     dataIndex: 'date' },
-    { title: 'Записей',  dataIndex: 'count', align: 'right' },
+    { title: t.stats.colDate,   dataIndex: 'date' },
+    { title: t.stats.colCount,  dataIndex: 'count', align: 'right' },
     {
       title: '',
       dataIndex: 'count',
@@ -54,25 +56,24 @@ export function StatsPage() {
   return (
     <>
       <Title level={3} style={{ marginTop: 0 }}>
-        Статистика{selectedApp ? ` — ${selectedApp.name}` : ' — все приложения'}
+        {t.stats.title}{selectedApp ? ` — ${selectedApp.name}` : ` — ${t.stats.allApps}`}
       </Title>
 
-      {/* Сводка */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card loading={loading}>
-            <Statistic title="Шаблонов" value={stats?.totalTemplates ?? 0} />
+            <Statistic title={t.stats.templates} value={stats?.totalTemplates ?? 0} />
           </Card>
         </Col>
         <Col span={6}>
           <Card loading={loading}>
-            <Statistic title="Записей логов" value={total} />
+            <Statistic title={t.stats.logEntries} value={total} />
           </Card>
         </Col>
         <Col span={6}>
           <Card loading={loading}>
             <Statistic
-              title="Ошибок (ERROR)"
+              title={t.stats.errors}
               value={stats?.entriesPerLevel?.ERROR ?? 0}
               valueStyle={{ color: '#ff4d4f' }}
             />
@@ -81,7 +82,7 @@ export function StatsPage() {
         <Col span={6}>
           <Card loading={loading}>
             <Statistic
-              title="Предупреждений (WARN)"
+              title={t.stats.warnings}
               value={stats?.entriesPerLevel?.WARN ?? 0}
               valueStyle={{ color: '#faad14' }}
             />
@@ -90,9 +91,8 @@ export function StatsPage() {
       </Row>
 
       <Row gutter={[16, 16]}>
-        {/* Распределение по уровням */}
         <Col span={12}>
-          <Card title="Распределение по уровням" loading={loading}>
+          <Card title={t.stats.levelDist} loading={loading}>
             {LEVEL_ORDER.map(level => {
               const count = stats?.entriesPerLevel?.[level] ?? 0;
               const pct = total ? Math.round((count / total) * 100) : 0;
@@ -114,9 +114,8 @@ export function StatsPage() {
           </Card>
         </Col>
 
-        {/* Активность по дням */}
         <Col span={12}>
-          <Card title="Активность за последние 5 дней" loading={loading}>
+          <Card title={t.stats.recentActivity} loading={loading}>
             <Table
               columns={activityColumns}
               dataSource={stats?.recentActivity ?? []}
@@ -127,10 +126,9 @@ export function StatsPage() {
           </Card>
         </Col>
 
-        {/* Топ сервисов */}
         {!selectedApp && (
           <Col span={24}>
-            <Card title="Записей по сервисам" loading={loading}>
+            <Card title={t.stats.byService} loading={loading}>
               <Table
                 columns={serviceColumns}
                 dataSource={serviceRows}

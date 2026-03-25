@@ -9,6 +9,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { useFetch } from '../hooks/useFetch';
 import { getStats, searchLogs } from '../api/logs';
 import { useAppContext } from '../context/AppContext';
+import { useT } from '../i18n/useT';
 import type { LogEntry, LogLevel } from '../types';
 
 const { Title } = Typography;
@@ -21,41 +22,46 @@ const levelColors: Record<LogLevel, string> = {
   ERROR:  'error',
 };
 
-const recentColumns: ColumnsType<LogEntry> = [
-  {
-    title: 'Время',
-    dataIndex: 'timestamp',
-    width: 180,
-    render: (v: string) => new Date(v).toLocaleString('ru'),
-  },
-  {
-    title: 'Уровень',
-    dataIndex: 'level',
-    width: 90,
-    render: (v: LogLevel) => <Tag color={levelColors[v]}>{v}</Tag>,
-  },
-  { title: 'Сервис',   dataIndex: 'service', width: 140 },
-  { title: 'Код лога', dataIndex: 'logCode' },
-];
+const DATE_LOCALE: Record<string, string> = { ru: 'ru-RU', en: 'en-US', zh: 'zh-CN' };
 
 export function DashboardPage() {
-  const { selectedApp } = useAppContext();
+  const { selectedApp, selectedLang } = useAppContext();
+  const t = useT();
   const appCode = selectedApp?.code;
   const { data: stats, loading: statsLoading, error: statsError } = useFetch(() => getStats(appCode), [appCode]);
   const { data: recent, loading: recentLoading } = useFetch(() =>
     searchLogs({ appCode, page: 0, size: 10, level: 'ERROR' }), [appCode]
   );
 
+  const dateLocale = DATE_LOCALE[selectedLang] ?? 'ru-RU';
+
+  const recentColumns: ColumnsType<LogEntry> = [
+    {
+      title: t.dashboard.colTime,
+      dataIndex: 'timestamp',
+      width: 180,
+      render: (v: string) => new Date(v).toLocaleString(dateLocale),
+    },
+    {
+      title: t.dashboard.colLevel,
+      dataIndex: 'level',
+      width: 90,
+      render: (v: LogLevel) => <Tag color={levelColors[v]}>{v}</Tag>,
+    },
+    { title: t.dashboard.colService,  dataIndex: 'service',  width: 140 },
+    { title: t.dashboard.colLogCode,  dataIndex: 'logCode' },
+  ];
+
   return (
     <>
       <Title level={3} style={{ marginTop: 0 }}>
-        Дашборд{selectedApp ? ` — ${selectedApp.name}` : ''}
+        {t.dashboard.title}{selectedApp ? ` — ${selectedApp.name}` : ''}
       </Title>
 
       {statsError && (
         <Alert
-          message="Не удалось загрузить статистику"
-          description="Не удалось подключиться к серверу."
+          message={t.dashboard.loadError}
+          description={t.dashboard.loadErrorDesc}
           type="warning"
           showIcon
           style={{ marginBottom: 24 }}
@@ -66,7 +72,7 @@ export function DashboardPage() {
         <Col span={6}>
           <Card loading={statsLoading}>
             <Statistic
-              title="Шаблонов"
+              title={t.dashboard.templates}
               value={stats?.totalTemplates ?? 0}
               prefix={<AppstoreOutlined />}
             />
@@ -75,7 +81,7 @@ export function DashboardPage() {
         <Col span={6}>
           <Card loading={statsLoading}>
             <Statistic
-              title="Записей логов"
+              title={t.dashboard.logEntries}
               value={stats?.totalEntries ?? 0}
               prefix={<FileTextOutlined />}
             />
@@ -103,7 +109,7 @@ export function DashboardPage() {
         </Col>
       </Row>
 
-      <Card title="Последние ошибки">
+      <Card title={t.dashboard.recentErrors}>
         <Table
           columns={recentColumns}
           dataSource={recent?.content ?? []}
@@ -111,7 +117,7 @@ export function DashboardPage() {
           rowKey="id"
           pagination={false}
           size="small"
-          locale={{ emptyText: 'Ошибок не найдено' }}
+          locale={{ emptyText: t.dashboard.noErrors }}
         />
       </Card>
     </>

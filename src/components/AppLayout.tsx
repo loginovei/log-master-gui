@@ -10,6 +10,8 @@ import {
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useAppContext } from '../context/AppContext';
+import { useT } from '../i18n/useT';
+import { LANG_LABELS } from '../i18n/translations';
 
 const { Sider, Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -17,20 +19,23 @@ const { Title, Text } = Typography;
 const SIDER_WIDTH = 220;
 const SIDER_COLLAPSED_WIDTH = 64;
 
-const menuItems = [
-  { key: '/',          icon: <DashboardOutlined />,  label: 'Дашборд' },
-  { key: '/logs',      icon: <FileTextOutlined />,   label: 'Логи' },
-  { key: '/templates', icon: <AppstoreOutlined />,   label: 'Шаблоны' },
-  { key: '/stats',     icon: <BarChartOutlined />,   label: 'Статистика' },
-];
+const LANG_OPTIONS = Object.entries(LANG_LABELS).map(([value, label]) => ({ value, label }));
 
 export function AppLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const { apps, selectedApp, setSelectedApp, selectedLang, setSelectedLang, availableLangs } = useAppContext();
+  const { apps, selectedApp, setSelectedApp, selectedLang, setSelectedLang } = useAppContext();
+  const t = useT();
 
   const siderWidth = collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH;
+
+  const menuItems = [
+    { key: '/',          icon: <DashboardOutlined />,  label: t.nav.dashboard },
+    { key: '/logs',      icon: <FileTextOutlined />,   label: t.nav.logs },
+    { key: '/templates', icon: <AppstoreOutlined />,   label: t.nav.templates },
+    { key: '/stats',     icon: <BarChartOutlined />,   label: t.nav.stats },
+  ];
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -71,10 +76,10 @@ export function AppLayout() {
         }}>
           <Space>
             <AppstoreAddOutlined style={{ color: '#1677ff' }} />
-            <Text type="secondary">Приложение:</Text>
+            <Text type="secondary">{t.header.app}</Text>
             <Select
               style={{ width: 240 }}
-              placeholder="Все приложения"
+              placeholder={t.header.appPlaceholder}
               allowClear
               value={selectedApp?.code ?? null}
               onChange={(code) => {
@@ -86,12 +91,12 @@ export function AppLayout() {
 
           <Space>
             <GlobalOutlined style={{ color: '#1677ff' }} />
-            <Text type="secondary">Язык:</Text>
+            <Text type="secondary">{t.header.lang}</Text>
             <Select
-              style={{ width: 100 }}
+              style={{ width: 120 }}
               value={selectedLang}
               onChange={setSelectedLang}
-              options={availableLangs.map(l => ({ value: l, label: l.toUpperCase() }))}
+              options={LANG_OPTIONS}
             />
           </Space>
         </Header>

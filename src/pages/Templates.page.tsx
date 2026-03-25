@@ -17,6 +17,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { useFetch } from '../hooks/useFetch';
 import { getTemplates, createTemplate, updateTemplate, deleteTemplate } from '../api/templates';
 import { useAppContext } from '../context/AppContext';
+import { useT } from '../i18n/useT';
 import type { LogTemplate } from '../types';
 
 const { Title } = Typography;
@@ -37,13 +38,12 @@ function fromRecord(messages: Record<string, string>): FormMessage[] {
 }
 
 export function TemplatesPage() {
-  const { selectedApp, selectedLang, setAvailableLangs } = useAppContext();
-  const { data, loading, refetch } = useFetch(async () => {
-    const result = await getTemplates({ appCode: selectedApp?.code });
-    const langs = [...new Set(result.content.flatMap(t => Object.keys(t.messages)))];
-    if (langs.length) setAvailableLangs(langs);
-    return result;
-  }, [selectedApp?.code]);
+  const { selectedApp, selectedLang } = useAppContext();
+  const t = useT();
+  const { data, loading, refetch } = useFetch(
+    () => getTemplates({ appCode: selectedApp?.code }),
+    [selectedApp?.code],
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<LogTemplate | null>(null);
   const [saving, setSaving] = useState(false);
@@ -72,15 +72,15 @@ export function TemplatesPage() {
       const payload = { logCode: values.logCode, appCode: selectedApp?.code ?? '', messages: toRecord(values.messages) };
       if (editing) {
         await updateTemplate(editing.logCode, payload);
-        message.success('Шаблон обновлён');
+        message.success(t.templates.saved);
       } else {
         await createTemplate(payload);
-        message.success('Шаблон создан');
+        message.success(t.templates.created);
       }
       setModalOpen(false);
       refetch();
     } catch {
-      message.error('Не удалось сохранить шаблон');
+      message.error(t.templates.saveError);
     } finally {
       setSaving(false);
     }
@@ -89,28 +89,28 @@ export function TemplatesPage() {
   async function handleDelete(logCode: string) {
     try {
       await deleteTemplate(logCode);
-      message.success('Шаблон удалён');
+      message.success(t.templates.deleted);
       refetch();
     } catch {
-      message.error('Не удалось удалить шаблон');
+      message.error(t.templates.deleteError);
     }
   }
 
   const columns: ColumnsType<LogTemplate> = [
     {
-      title: 'Приложение',
+      title: t.templates.colApp,
       dataIndex: 'appCode',
       width: 200,
       render: (v: string) => <Tag color="geekblue">{v}</Tag>,
     },
     {
-      title: 'Код лога',
+      title: t.templates.colLogCode,
       dataIndex: 'logCode',
       width: 160,
       render: (v: string) => <Tag color="blue">{v}</Tag>,
     },
     {
-      title: 'Сообщение',
+      title: t.templates.colMessage,
       dataIndex: 'messages',
       render: (messages: Record<string, string>) => {
         const text = messages[selectedLang] ?? Object.values(messages)[0] ?? '—';
@@ -125,7 +125,7 @@ export function TemplatesPage() {
       },
     },
     {
-      title: 'Языки',
+      title: t.templates.colLangs,
       dataIndex: 'messages',
       width: 120,
       render: (messages: Record<string, string>) => (
@@ -146,11 +146,11 @@ export function TemplatesPage() {
             onClick={() => openEdit(record)}
           />
           <Popconfirm
-            title="Удалить шаблон?"
-            description={`Код: ${record.logCode}`}
+            title={t.templates.deleteConfirm}
+            description={`${t.templates.colLogCode}: ${record.logCode}`}
             onConfirm={() => handleDelete(record.logCode)}
-            okText="Удалить"
-            cancelText="Отмена"
+            okText={t.templates.deleteOk}
+            cancelText={t.templates.cancel}
             okButtonProps={{ danger: true }}
           >
             <Button icon={<DeleteOutlined />} size="small" danger />
@@ -162,12 +162,12 @@ export function TemplatesPage() {
 
   return (
     <>
-      <Title level={3} style={{ marginTop: 0 }}>Шаблоны логов</Title>
+      <Title level={3} style={{ marginTop: 0 }}>{t.templates.title}</Title>
 
       <Card
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-            Добавить шаблон
+            {t.templates.add}
           </Button>
         }
       >
@@ -177,26 +177,26 @@ export function TemplatesPage() {
           loading={loading}
           rowKey="logCode"
           size="small"
-          locale={{ emptyText: 'Шаблоны не найдены' }}
-          pagination={{ pageSize: 20, showTotal: (t) => `Всего: ${t}` }}
+          locale={{ emptyText: t.templates.noTemplates }}
+          pagination={{ pageSize: 20, showTotal: (total) => `${t.templates.total}: ${total}` }}
         />
       </Card>
 
       <Modal
-        title={editing ? 'Редактировать шаблон' : 'Новый шаблон'}
+        title={editing ? t.templates.modalEdit : t.templates.modalCreate}
         open={modalOpen}
         onOk={handleSave}
         onCancel={() => setModalOpen(false)}
-        okText="Сохранить"
-        cancelText="Отмена"
+        okText={t.templates.save}
+        cancelText={t.templates.cancel}
         confirmLoading={saving}
         width={640}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item
             name="logCode"
-            label="Код лога (logCode)"
-            rules={[{ required: true, message: 'Введите код лога' }]}
+            label={t.templates.logCodeLabel}
+            rules={[{ required: true, message: t.templates.logCodeRequired }]}
           >
             <Input
               placeholder="AUTH_001"
@@ -205,10 +205,10 @@ export function TemplatesPage() {
             />
           </Form.Item>
 
-          <Form.Item label="Тексты шаблона по языкам">
+          <Form.Item label={t.templates.messagesLabel}>
             <Form.List name="messages" rules={[{
               validator: async (_, items) => {
-                if (!items?.length) throw new Error('Добавьте хотя бы один язык');
+                if (!items?.length) throw new Error(t.templates.atLeastOneLang);
               }
             }]}>
               {(fields, { add, remove }, { errors }) => (
@@ -244,7 +244,7 @@ export function TemplatesPage() {
                     icon={<PlusCircleOutlined />}
                     block
                   >
-                    Добавить язык
+                    {t.templates.addLang}
                   </Button>
                   <Form.ErrorList errors={errors} />
                 </>
