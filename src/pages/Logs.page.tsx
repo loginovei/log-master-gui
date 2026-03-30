@@ -55,6 +55,7 @@ export function LogsPage() {
 
   // ── Recent logs ────────────────────────────────────────────────────────────
   const [recentSize, setRecentSize] = useState(25);
+  const [recentPage, setRecentPage] = useState(1);
 
   const { data: templatesPage } = useFetch(
     () => getTemplates({ appCode: selectedApp?.code, size: 500 }),
@@ -66,8 +67,8 @@ export function LogsPage() {
   );
 
   const { data: recentLogs, loading: recentLoading, refetch: refetchRecent } = useFetch(
-    () => searchLogs({ appCode: selectedApp?.code, page: 0, size: recentSize }),
-    [selectedApp?.code, recentSize],
+    () => searchLogs({ appCode: selectedApp?.code, page: recentPage - 1, size: recentSize }),
+    [selectedApp?.code, recentSize, recentPage],
   );
 
   // ── Template search + filtered logs ───────────────────────────────────────
@@ -391,7 +392,7 @@ export function LogsPage() {
             <Text type="secondary">{t.logs.recentShow}:</Text>
             <Select
               value={recentSize}
-              onChange={setRecentSize}
+              onChange={(n) => { setRecentSize(n); setRecentPage(1); }}
               style={{ width: 80 }}
               options={RECENT_SIZES.map(n => ({ value: n, label: String(n) }))}
             />
@@ -405,9 +406,16 @@ export function LogsPage() {
           loading={recentLoading}
           rowKey="id"
           size="small"
-          pagination={false}
           locale={{ emptyText: t.logs.noEntries }}
           expandable={expandable}
+          pagination={{
+            current: recentPage,
+            total: recentLogs?.totalElements ?? 0,
+            pageSize: recentSize,
+            showSizeChanger: false,
+            showTotal: (total) => `${t.logs.total}: ${total}`,
+            onChange: (p) => setRecentPage(p),
+          }}
         />
       </Card>
 
