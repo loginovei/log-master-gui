@@ -8,6 +8,7 @@ import {
   Divider,
   Form,
   Modal,
+  Pagination,
   Row,
   Select,
   Space,
@@ -280,8 +281,22 @@ export function LogsPage() {
     <>
       <Title level={3} style={{ marginTop: 0 }}>{t.logs.title}</Title>
 
-      {/* ── Template search ── */}
-      <Card title={t.logs.searchTitle} style={{ marginBottom: 16 }}>
+      {/* ── Search + Filters ── */}
+      <Card
+        title={t.logs.searchTitle}
+        extra={
+          <Button
+            icon={<FilterOutlined />}
+            onClick={handleApplyFilters}
+            type="primary"
+            ghost
+            disabled={!selectedTemplate}
+          >
+            {t.logs.applyFilters}
+          </Button>
+        }
+        style={{ marginBottom: 16 }}
+      >
         <Space.Compact style={{ width: '100%' }}>
           <AutoComplete
             style={{ width: '100%' }}
@@ -311,24 +326,8 @@ export function LogsPage() {
             </Space>
           </>
         )}
-      </Card>
 
-      {/* ── Filters (always visible) ── */}
-      <Card
-        title={t.logs.step2}
-        extra={
-          <Button
-            icon={<FilterOutlined />}
-            onClick={handleApplyFilters}
-            type="primary"
-            ghost
-            disabled={!selectedTemplate}
-          >
-            {t.logs.applyFilters}
-          </Button>
-        }
-        style={{ marginBottom: 16 }}
-      >
+        <Divider style={{ margin: '12px 0' }} />
         <Form layout="inline">
           <Row gutter={[12, 12]} style={{ width: '100%' }}>
             <Col span={6}>
@@ -389,12 +388,15 @@ export function LogsPage() {
         }
         extra={
           <Space>
-            <Text type="secondary">{t.logs.recentShow}:</Text>
-            <Select
-              value={recentSize}
-              onChange={(n) => { setRecentSize(n); setRecentPage(1); }}
-              style={{ width: 80 }}
-              options={RECENT_SIZES.map(n => ({ value: n, label: String(n) }))}
+            <Pagination
+              size="small"
+              current={recentPage}
+              total={recentLogs?.totalElements ?? 0}
+              pageSize={recentSize}
+              pageSizeOptions={RECENT_SIZES}
+              showSizeChanger
+              showTotal={(total) => `${t.logs.total}: ${total}`}
+              onChange={(p, s) => { setRecentPage(p); if (s !== recentSize) { setRecentSize(s); setRecentPage(1); } }}
             />
             <Button icon={<ReloadOutlined />} onClick={refetchRecent} />
           </Space>
