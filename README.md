@@ -1,73 +1,120 @@
-# React + TypeScript + Vite
+# log-master-gui — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-интерфейс для системы управления логами. Позволяет просматривать, искать и анализировать лог-записи, управлять шаблонами и следить за статистикой приложений.
 
-Currently, two official plugins are available:
+## Функциональные возможности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Дашборд с общей статистикой и последними ошибками
+- Двухэтапный поиск логов: полнотекстовый поиск по шаблону → фильтрация записей по уровню, сервису и периоду
+- Просмотр последних записей логов с постраничной навигацией
+- Раскрытие стек-трейса и параметров прямо в строке таблицы
+- Управление шаблонами: создание, редактирование, удаление с поддержкой нескольких языков
+- Графическая статистика: распределение по уровням, активность по дням, топ сервисов
+- Фильтрация всех данных по приложению через глобальный селектор в шапке
+- Интерфейс на трёх языках: русский, английский, китайский
 
-## React Compiler
+## Механика
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Мультиязычность
 
-## Expanding the ESLint configuration
+Выбранный в шапке язык влияет одновременно на два уровня:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Язык интерфейса** — все надписи, заголовки, сообщения об ошибках
+- **Язык шаблонов** — текст лог-сообщений отображается на выбранном языке
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Переводы интерфейса хранятся статически в `src/i18n/translations.ts`. Доступ к текущим строкам — через хук `useT()`.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Рендеринг сообщений логов
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Лог-запись хранит только `logCode` и позиционные аргументы. Текст восстанавливается на клиенте:
+
+```
+template: "Пользователь {0} вошёл с IP {1}"
+args:     { "0": "john.doe", "1": "192.168.1.1" }
+result:   "Пользователь john.doe вошёл с IP 192.168.1.1"
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Для таблицы последних логов все шаблоны загружаются один раз в `Record<logCode, LogTemplate>` через `useMemo` — рендеринг каждой строки O(1).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Глобальный контекст
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+`AppContext` предоставляет через `useAppContext()`:
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `apps` | `Application[]` | Список всех приложений |
+| `selectedApp` | `Application \| null` | Выбранное приложение |
+| `setSelectedApp` | функция | Переключение приложения |
+| `selectedLang` | `string` | Текущий язык (`ru` / `en` / `zh`) |
+| `setSelectedLang` | функция | Переключение языка |
+
+### HTTP-клиент и типы
+
+API-клиент (`src/api/client.ts`) построен на Axios. TypeScript-типы и методы сгенерированы из OpenAPI-спецификации бэкенда с помощью `openapi-generator-cli` и лежат в `src/api/generated/`.
+
+Хук `useFetch<T>(fetcher, deps)` инкапсулирует стандартный цикл загрузки: `loading → data | error`, реагирует на изменение зависимостей и предоставляет `refetch`.
+
+## Страницы
+
+| Маршрут | Компонент | Описание |
+|---|---|---|
+| `/` | `Dashboard.page` | Счётчики и последние ошибки |
+| `/logs` | `Logs.page` | Поиск и просмотр логов |
+| `/templates` | `Templates.page` | Управление шаблонами |
+| `/stats` | `Stats.page` | Графики и таблицы статистики |
+
+## Структура проекта
+
 ```
+src/
+├── api/
+│   ├── generated/      # TypeScript-клиент, сгенерированный из OpenAPI
+│   ├── client.ts       # Axios-инстанс с базовым URL
+│   ├── applications.ts # Запросы к /api/applications
+│   ├── logs.ts         # Запросы к /api/logs
+│   └── templates.ts    # Запросы к /api/templates
+├── components/
+│   └── AppLayout.tsx   # Основной layout: навигация, шапка, селекторы
+├── context/
+│   └── AppContext.tsx  # Глобальное состояние приложения и языка
+├── hooks/
+│   └── useFetch.ts     # Универсальный хук для загрузки данных
+├── i18n/
+│   ├── translations.ts # Словари ru / en / zh
+│   └── useT.ts         # Хук доступа к переводам текущего языка
+├── pages/
+│   ├── Dashboard.page.tsx
+│   ├── Logs.page.tsx
+│   ├── Stats.page.tsx
+│   └── Templates.page.tsx
+└── types/
+    └── index.ts        # Общие TypeScript-типы
+```
+
+## Конфигурация
+
+URL бэкенда задаётся в `src/api/client.ts`. По умолчанию:
+
+```
+http://localhost:8080/log-master
+```
+
+Для перегенерации API-клиента из OpenAPI-спецификации бэкенда:
+
+```bash
+npm run generate:api
+```
+
+Спецификация читается из `openapi.json` в корне проекта (скачать с `GET /log-master/api-docs`).
+
+## Стек
+
+| Компонент | Версия |
+|---|---|
+| React | 19 |
+| TypeScript | 5.9 |
+| Vite | 7 |
+| Ant Design | 6 |
+| React Router | 7 |
+| Axios | 1.x |
+| openapi-generator-cli | 2.x |
