@@ -7,6 +7,7 @@ import {
   DatePicker,
   Divider,
   Form,
+  Input,
   Modal,
   Pagination,
   Row,
@@ -230,7 +231,7 @@ export function LogsPage() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const results = await searchTemplates({ q: templateQuery, appCode: selectedApp?.code });
+        const results = await searchTemplates({ q: templateQuery, appCode: selectedApp?.code, lang: selectedLang });
         setTemplateOptions(results.map(tmpl => ({
           value: tmpl.logCode,
           label: `${tmpl.logCode} — ${tmpl.messages[selectedLang] ?? Object.values(tmpl.messages)[0] ?? ''}`,
@@ -252,7 +253,19 @@ export function LogsPage() {
 
   function handleSelectTemplate(value: string) {
     const opt = templateOptions.find(o => o.value === value);
-    if (opt) { setSelectedTemplate(opt.template); setPage(1); loadLogs(value, 1); }
+    if (opt) { setSelectedTemplate(opt.template); setPage(1); }
+  }
+
+  function handleSearch() {
+    if (selectedTemplate) {
+      setPage(1);
+      loadLogs(selectedTemplate.logCode, 1);
+    } else if (templateOptions.length === 1) {
+      const opt = templateOptions[0];
+      setSelectedTemplate(opt.template);
+      setPage(1);
+      loadLogs(opt.value, 1);
+    }
   }
 
   function handleApplyFilters() {
@@ -300,16 +313,18 @@ export function LogsPage() {
         <Space.Compact style={{ width: '100%' }}>
           <AutoComplete
             style={{ width: '100%' }}
-            placeholder={t.logs.step1Placeholder}
             value={templateQuery}
             onChange={setTemplateQuery}
             onSelect={handleSelectTemplate}
             options={templateOptions.map(o => ({ value: o.value, label: o.label }))}
             allowClear
-          />
-          <Button icon={<SearchOutlined />} type="primary" onClick={() => {
-            if (templateOptions.length === 1) handleSelectTemplate(templateOptions[0].value);
-          }}>
+          >
+            <Input
+              placeholder={t.logs.step1Placeholder}
+              onPressEnter={handleSearch}
+            />
+          </AutoComplete>
+          <Button icon={<SearchOutlined />} type="primary" onClick={handleSearch}>
             {t.logs.search}
           </Button>
         </Space.Compact>

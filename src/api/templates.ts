@@ -1,4 +1,5 @@
 import { logTemplatesApi } from './apiClient';
+import client from './client';
 import type { LogTemplate, Page, TemplateSearchParams } from '../types';
 
 export async function getTemplates(params: TemplateSearchParams = {}): Promise<Page<LogTemplate>> {
@@ -13,8 +14,10 @@ export async function getTemplates(params: TemplateSearchParams = {}): Promise<P
 }
 
 export async function searchTemplates(params: TemplateSearchParams): Promise<LogTemplate[]> {
-  const { data } = await logTemplatesApi.search(params.appCode, params.q);
-  return data.map(toTemplate);
+  const { data } = await client.get('/log-master/api/templates/search', {
+    params: { appCode: params.appCode, q: params.q, lang: params.lang },
+  });
+  return (data as any[]).map(toTemplate);
 }
 
 export async function createTemplate(template: Omit<LogTemplate, 'id'>): Promise<LogTemplate> {

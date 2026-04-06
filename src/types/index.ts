@@ -44,6 +44,7 @@ export interface LogSearchParams {
 export interface TemplateSearchParams {
   appCode?: string;
   q?: string;
+  lang?: string;
   page?: number;
   size?: number;
 }
