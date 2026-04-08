@@ -14,7 +14,7 @@ export async function getTemplates(params: TemplateSearchParams = {}): Promise<P
 }
 
 export async function searchTemplates(params: TemplateSearchParams): Promise<LogTemplate[]> {
-  const { data } = await client.get('/log-master/api/templates/search', {
+  const { data } = await client.get('/api/templates/search', {
     params: { appCode: params.appCode, q: params.q, lang: params.lang },
   });
   return (data as any[]).map(toTemplate);
