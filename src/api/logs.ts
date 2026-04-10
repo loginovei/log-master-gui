@@ -2,8 +2,9 @@ import { logsApi } from './apiClient';
 import type { AppStats, LogEntry, LogLevel, LogSearchParams, Page } from '../types';
 
 export async function searchLogs(params: LogSearchParams): Promise<Page<LogEntry>> {
+  const effectiveAppCode = params.appCode ?? params.service;
   const { data } = await logsApi.search1(
-    params.appCode,
+    effectiveAppCode,
     params.logCode,
     params.level,
     params.from,

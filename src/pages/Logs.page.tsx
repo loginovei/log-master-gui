@@ -51,7 +51,7 @@ function renderMessage(template: LogTemplate, params: Record<string, unknown>, l
 }
 
 export function LogsPage() {
-  const { selectedApp, selectedLang } = useAppContext();
+  const { apps, selectedApp, selectedLang } = useAppContext();
   const t = useT();
   const dateLocale = DATE_LOCALE[selectedLang] ?? 'ru-RU';
 
@@ -260,11 +260,9 @@ export function LogsPage() {
     if (selectedTemplate) {
       setPage(1);
       loadLogs(selectedTemplate.logCode, 1);
-    } else if (templateOptions.length === 1) {
-      const opt = templateOptions[0];
-      setSelectedTemplate(opt.template);
+    } else if (templateQuery.trim()) {
       setPage(1);
-      loadLogs(opt.value, 1);
+      loadLogs(templateQuery.trim(), 1);
     }
   }
 
@@ -357,8 +355,14 @@ export function LogsPage() {
             </Col>
             <Col span={6}>
               <Form.Item label={t.logs.service} style={{ margin: 0 }}>
-                <Select allowClear placeholder={t.logs.allServices} style={{ width: '100%' }}
-                  onChange={(v) => setFilters(f => ({ ...f, service: v }))} />
+                <Select
+                  allowClear
+                  placeholder={t.logs.allServices}
+                  style={{ width: '100%' }}
+                  disabled={!!selectedApp}
+                  options={apps.map(a => ({ value: a.code, label: a.name }))}
+                  onChange={(v) => setFilters(f => ({ ...f, service: v }))}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
