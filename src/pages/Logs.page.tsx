@@ -454,6 +454,19 @@ export function LogsPage() {
         }}>
           {paramsEntry ? JSON.stringify(paramsEntry.params, null, 2) : ''}
         </pre>
+        {paramsEntry?.additional && Object.keys(paramsEntry.additional).length > 0 && (
+          <>
+            <Divider style={{ margin: '12px 0' }} />
+            <Text strong>{t.logs.context}</Text>
+            <pre style={{
+              margin: '8px 0 0', padding: '12px 16px', background: '#f6f8fa',
+              borderRadius: 6, fontSize: 13, lineHeight: 1.6,
+              whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace',
+            }}>
+              {JSON.stringify(paramsEntry.additional, null, 2)}
+            </pre>
+          </>
+        )}
       </Modal>
     </>
   );

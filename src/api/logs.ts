@@ -32,7 +32,7 @@ export async function getStats(appCode?: string): Promise<AppStats> {
   };
 }
 
-function toEntry(r: { id?: string; logCode?: string; params?: Record<string, object>; timestamp?: string; service?: string; level?: string; stackTrace?: string }): LogEntry {
+function toEntry(r: { id?: string; logCode?: string; params?: Record<string, object>; timestamp?: string; service?: string; level?: string; stackTrace?: string; additional?: Record<string, unknown> }): LogEntry {
   return {
     id: r.id ?? '',
     logCode: r.logCode ?? '',
@@ -41,5 +41,6 @@ function toEntry(r: { id?: string; logCode?: string; params?: Record<string, obj
     service: r.service ?? '',
     level: (r.level ?? 'INFO') as LogLevel,
     stackTrace: r.stackTrace,
+    additional: r.additional,
   };
 }

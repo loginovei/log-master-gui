@@ -20,6 +20,7 @@ export interface LogEntry {
   service: string;
   level: LogLevel;
   stackTrace?: string;
+  additional?: Record<string, unknown>;
 }
 
 export interface Page<T> {
