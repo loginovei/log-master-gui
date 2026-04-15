@@ -590,7 +590,8 @@
                     },
                     "stackTrace": {
                         "type": "string"
-                    }
+                    },
+                    "additional": {}
                 }
             },
             "PageDtoLogEntryResponse": {

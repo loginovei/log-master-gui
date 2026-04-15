@@ -14,6 +14,7 @@ import {
   Select,
   Space,
   Table,
+  Tabs,
   Tag,
   Tooltip,
   Typography,
@@ -83,7 +84,7 @@ export function LogsPage() {
   const [page, setPage] = useState(1);
   const [searched, setSearched] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
-  const [paramsEntry, setParamsEntry] = useState<LogEntry | null>(null);
+  const [detailEntry, setDetailEntry] = useState<LogEntry | null>(null);
   const [colOrder, setColOrder] = useState<string[]>(DEFAULT_COL_ORDER);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dragKey = useRef<string>('');
@@ -132,9 +133,9 @@ export function LogsPage() {
       width: 72,
       render: (_, record: LogEntry) => (
         <Space size={4}>
-          {Object.keys(record.params).length > 0 && (
+          {(Object.keys(record.params).length > 0 || !!record.additional) && (
             <Tooltip title={t.logs.params}>
-              <Button size="small" icon={<CodeOutlined />} onClick={() => setParamsEntry(record)} />
+              <Button size="small" icon={<CodeOutlined />} onClick={() => setDetailEntry(record)} />
             </Tooltip>
           )}
           {record.stackTrace && (
@@ -205,9 +206,9 @@ export function LogsPage() {
       key: 'actions', title: '', width: 72,
       render: (_, record) => (
         <Space size={4}>
-          {Object.keys(record.params).length > 0 && (
+          {(Object.keys(record.params).length > 0 || !!record.additional) && (
             <Tooltip title={t.logs.params}>
-              <Button size="small" icon={<CodeOutlined />} onClick={() => setParamsEntry(record)} />
+              <Button size="small" icon={<CodeOutlined />} onClick={() => setDetailEntry(record)} />
             </Tooltip>
           )}
           {record.stackTrace && (
@@ -441,32 +442,45 @@ export function LogsPage() {
       </Card>
 
       <Modal
-        title={`${t.logs.params} — ${paramsEntry?.logCode}`}
-        open={!!paramsEntry}
-        onCancel={() => setParamsEntry(null)}
+        title={detailEntry?.logCode}
+        open={!!detailEntry}
+        onCancel={() => setDetailEntry(null)}
         footer={null}
-        width={560}
+        width={600}
       >
-        <pre style={{
-          margin: 0, padding: '12px 16px', background: '#f6f8fa',
-          borderRadius: 6, fontSize: 13, lineHeight: 1.6,
-          whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace',
-        }}>
-          {paramsEntry ? JSON.stringify(paramsEntry.params, null, 2) : ''}
-        </pre>
-        {paramsEntry?.additional && Object.keys(paramsEntry.additional).length > 0 && (
-          <>
-            <Divider style={{ margin: '12px 0' }} />
-            <Text strong>{t.logs.context}</Text>
-            <pre style={{
-              margin: '8px 0 0', padding: '12px 16px', background: '#f6f8fa',
-              borderRadius: 6, fontSize: 13, lineHeight: 1.6,
-              whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace',
-            }}>
-              {JSON.stringify(paramsEntry.additional, null, 2)}
-            </pre>
-          </>
-        )}
+        <Tabs
+          defaultActiveKey={
+            detailEntry && Object.keys(detailEntry.params).length > 0 ? 'params' : 'additional'
+          }
+          items={[
+            ...(detailEntry && Object.keys(detailEntry.params).length > 0 ? [{
+              key: 'params',
+              label: t.logs.params,
+              children: (
+                <pre style={{
+                  margin: 0, padding: '12px 16px', background: '#f6f8fa',
+                  borderRadius: 6, fontSize: 13, lineHeight: 1.6,
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace',
+                }}>
+                  {JSON.stringify(detailEntry.params, null, 2)}
+                </pre>
+              ),
+            }] : []),
+            ...(detailEntry?.additional ? [{
+              key: 'additional',
+              label: t.logs.context,
+              children: (
+                <pre style={{
+                  margin: 0, padding: '12px 16px', background: '#f6f8fa',
+                  borderRadius: 6, fontSize: 13, lineHeight: 1.6,
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace',
+                }}>
+                  {detailEntry.additional}
+                </pre>
+              ),
+            }] : []),
+          ]}
+        />
       </Modal>
     </>
   );

@@ -22,5 +22,6 @@ export interface LogEntryResponse {
     'service'?: string;
     'level'?: string;
     'stackTrace'?: string;
+    'additional'?: any;
 }
 

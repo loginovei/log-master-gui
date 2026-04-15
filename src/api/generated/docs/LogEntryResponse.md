@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **service** | **string** |  | [optional] [default to undefined]
 **level** | **string** |  | [optional] [default to undefined]
 **stackTrace** | **string** |  | [optional] [default to undefined]
+**additional** | **any** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -26,6 +27,7 @@ const instance: LogEntryResponse = {
     service,
     level,
     stackTrace,
+    additional,
 };
 ```
 
