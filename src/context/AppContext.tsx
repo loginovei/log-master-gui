@@ -8,6 +8,7 @@ interface AppContextValue {
   setSelectedApp: (app: Application | null) => void;
   selectedLang: string;
   setSelectedLang: (lang: string) => void;
+  refreshApps: () => void;
 }
 
 const AppContext = createContext<AppContextValue>({
@@ -16,6 +17,7 @@ const AppContext = createContext<AppContextValue>({
   setSelectedApp: () => {},
   selectedLang: 'ru',
   setSelectedLang: () => {},
+  refreshApps: () => {},
 });
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -23,12 +25,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [selectedLang, setSelectedLang] = useState('ru');
 
-  useEffect(() => {
+  function refreshApps() {
     getApplications().then(setApps).catch(() => {});
+  }
+
+  useEffect(() => {
+    refreshApps();
   }, []);
 
   return (
-    <AppContext.Provider value={{ apps, selectedApp, setSelectedApp, selectedLang, setSelectedLang }}>
+    <AppContext.Provider value={{ apps, selectedApp, setSelectedApp, selectedLang, setSelectedLang, refreshApps }}>
       {children}
     </AppContext.Provider>
   );

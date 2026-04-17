@@ -31,10 +31,11 @@ export function AppLayout() {
   const siderWidth = collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH;
 
   const menuItems = [
-    { key: '/',          icon: <DashboardOutlined />,  label: t.nav.dashboard },
-    { key: '/logs',      icon: <FileTextOutlined />,   label: t.nav.logs },
-    { key: '/templates', icon: <AppstoreOutlined />,   label: t.nav.templates },
-    { key: '/stats',     icon: <BarChartOutlined />,   label: t.nav.stats },
+    { key: '/',               icon: <DashboardOutlined />,   label: t.nav.dashboard },
+    { key: '/logs',           icon: <FileTextOutlined />,    label: t.nav.logs },
+    { key: '/templates',      icon: <AppstoreOutlined />,    label: t.nav.templates },
+    { key: '/stats',          icon: <BarChartOutlined />,    label: t.nav.stats },
+    { key: '/applications',   icon: <AppstoreAddOutlined />, label: t.nav.applications },
   ];
 
   return (
