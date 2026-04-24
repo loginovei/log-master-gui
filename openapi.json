@@ -474,6 +474,10 @@
                         "type": "string",
                         "minLength": 1
                     },
+                    "level": {
+                        "type": "string",
+                        "enum": ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"]
+                    },
                     "messages": {
                         "type": "object",
                         "additionalProperties": {
@@ -484,6 +488,7 @@
                 },
                 "required": [
                     "appCode",
+                    "level",
                     "logCode",
                     "messages"
                 ]
@@ -499,6 +504,10 @@
                     },
                     "appCode": {
                         "type": "string"
+                    },
+                    "level": {
+                        "type": "string",
+                        "enum": ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"]
                     },
                     "messages": {
                         "type": "object",

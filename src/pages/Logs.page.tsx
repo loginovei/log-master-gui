@@ -60,6 +60,9 @@ export function LogsPage() {
   const [recentSize, setRecentSize] = useState(25);
   const [recentPage, setRecentPage] = useState(1);
 
+  useEffect(() => { setRecentPage(1); }, [selectedApp?.code]);
+  useEffect(() => { setRecentPage(1); }, [recentSize]);
+
   const { data: templatesPage } = useFetch(
     () => getTemplates({ appCode: selectedApp?.code, size: 500 }),
     [selectedApp?.code],
@@ -316,6 +319,7 @@ export function LogsPage() {
             onChange={setTemplateQuery}
             onSelect={handleSelectTemplate}
             options={templateOptions.map(o => ({ value: o.value, label: o.label }))}
+            notFoundContent={templateQuery.trim() ? t.templates.noTemplates : null}
             allowClear
           >
             <Input

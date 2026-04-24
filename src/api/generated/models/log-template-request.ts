@@ -17,6 +17,18 @@
 export interface LogTemplateRequest {
     'logCode': string;
     'appCode': string;
+    'level': LogTemplateRequestLevelEnum;
     'messages': { [key: string]: string; };
 }
+
+export const LogTemplateRequestLevelEnum = {
+    Trace: 'TRACE',
+    Debug: 'DEBUG',
+    Info: 'INFO',
+    Warn: 'WARN',
+    Error: 'ERROR',
+} as const;
+
+export type LogTemplateRequestLevelEnum = typeof LogTemplateRequestLevelEnum[keyof typeof LogTemplateRequestLevelEnum];
+
 

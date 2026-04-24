@@ -6,6 +6,7 @@ import {
   Input,
   Modal,
   Popconfirm,
+  Select,
   Space,
   Table,
   Tag,
@@ -18,7 +19,13 @@ import { useFetch } from '../hooks/useFetch';
 import { getTemplates, createTemplate, updateTemplate, deleteTemplate } from '../api/templates';
 import { useAppContext } from '../context/AppContext';
 import { useT } from '../i18n/useT';
-import type { LogTemplate } from '../types';
+import type { LogLevel, LogTemplate } from '../types';
+
+const levelColors: Record<LogLevel, string> = {
+  TRACE: 'default', DEBUG: 'blue', INFO: 'success', WARN: 'warning', ERROR: 'error',
+};
+
+const LEVEL_OPTIONS: LogLevel[] = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
 
 const { Title } = Typography;
 
@@ -26,6 +33,7 @@ type FormMessage = { lang: string; text: string };
 
 interface TemplateFormValues {
   logCode: string;
+  level: LogLevel;
   messages: FormMessage[];
 }
 
@@ -52,7 +60,7 @@ export function TemplatesPage() {
   function openCreate() {
     setEditing(null);
     form.resetFields();
-    form.setFieldsValue({ messages: [{ lang: selectedLang, text: '' }] });
+    form.setFieldsValue({ level: 'INFO', messages: [{ lang: selectedLang, text: '' }] });
     setModalOpen(true);
   }
 
@@ -60,6 +68,7 @@ export function TemplatesPage() {
     setEditing(template);
     form.setFieldsValue({
       logCode: template.logCode,
+      level: template.level,
       messages: fromRecord(template.messages),
     });
     setModalOpen(true);
@@ -69,7 +78,7 @@ export function TemplatesPage() {
     const values = await form.validateFields();
     setSaving(true);
     try {
-      const payload = { logCode: values.logCode, appCode: selectedApp?.code ?? '', messages: toRecord(values.messages) };
+      const payload = { logCode: values.logCode, appCode: selectedApp?.code ?? '', level: values.level, messages: toRecord(values.messages) };
       if (editing) {
         await updateTemplate(editing.logCode, payload);
         message.success(t.templates.saved);
@@ -108,6 +117,12 @@ export function TemplatesPage() {
       dataIndex: 'logCode',
       width: 160,
       render: (v: string) => <Tag color="blue">{v}</Tag>,
+    },
+    {
+      title: t.templates.colLevel,
+      dataIndex: 'level',
+      width: 100,
+      render: (v: LogLevel) => v ? <Tag color={levelColors[v]}>{v}</Tag> : null,
     },
     {
       title: t.templates.colMessage,
@@ -203,6 +218,17 @@ export function TemplatesPage() {
               disabled={!!editing}
               style={{ fontFamily: 'monospace' }}
             />
+          </Form.Item>
+
+          <Form.Item
+            name="level"
+            label={t.templates.levelLabel}
+            rules={[{ required: true, message: t.templates.levelRequired }]}
+          >
+            <Select options={LEVEL_OPTIONS.map(l => ({
+              value: l,
+              label: <Tag color={levelColors[l]}>{l}</Tag>,
+            }))} />
           </Form.Item>
 
           <Form.Item label={t.templates.messagesLabel}>

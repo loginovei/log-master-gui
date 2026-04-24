@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **logCode** | **string** |  | [default to undefined]
 **appCode** | **string** |  | [default to undefined]
+**level** | **string** |  | [default to undefined]
 **messages** | **{ [key: string]: string; }** |  | [default to undefined]
 
 ## Example
@@ -17,6 +18,7 @@ import { LogTemplateRequest } from './api';
 const instance: LogTemplateRequest = {
     logCode,
     appCode,
+    level,
     messages,
 };
 ```

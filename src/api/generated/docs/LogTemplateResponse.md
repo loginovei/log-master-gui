@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **id** | **string** |  | [optional] [default to undefined]
 **logCode** | **string** |  | [optional] [default to undefined]
 **appCode** | **string** |  | [optional] [default to undefined]
+**level** | **string** |  | [optional] [default to undefined]
 **messages** | **{ [key: string]: string; }** |  | [optional] [default to undefined]
 
 ## Example
@@ -19,6 +20,7 @@ const instance: LogTemplateResponse = {
     id,
     logCode,
     appCode,
+    level,
     messages,
 };
 ```

@@ -9,6 +9,7 @@ export interface LogTemplate {
   id?: string;
   logCode: string;
   appCode: string;
+  level: LogLevel;
   messages: Record<string, string>; // { "ru": "Пользователь {0} вошёл", "en": "User {0} logged in" }
 }
 

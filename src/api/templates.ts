@@ -1,6 +1,6 @@
 import { logTemplatesApi } from './apiClient';
 import client from './client';
-import type { LogTemplate, Page, TemplateSearchParams } from '../types';
+import type { LogLevel, LogTemplate, Page, TemplateSearchParams } from '../types';
 
 export async function getTemplates(params: TemplateSearchParams = {}): Promise<Page<LogTemplate>> {
   const { data } = await logTemplatesApi.findAll(params.appCode, params.page ?? 0, params.size ?? 100);
@@ -24,6 +24,7 @@ export async function createTemplate(template: Omit<LogTemplate, 'id'>): Promise
   const { data } = await logTemplatesApi.create({
     logCode: template.logCode,
     appCode: template.appCode,
+    level: template.level as any,
     messages: template.messages,
   });
   return toTemplate(data);
@@ -33,6 +34,7 @@ export async function updateTemplate(logCode: string, template: Omit<LogTemplate
   const { data } = await logTemplatesApi.update(logCode, {
     logCode: template.logCode,
     appCode: template.appCode,
+    level: template.level as any,
     messages: template.messages,
   });
   return toTemplate(data);
@@ -42,11 +44,12 @@ export async function deleteTemplate(logCode: string): Promise<void> {
   await logTemplatesApi._delete(logCode);
 }
 
-function toTemplate(r: { id?: string; logCode?: string; appCode?: string; messages?: Record<string, string> }): LogTemplate {
+function toTemplate(r: { id?: string; logCode?: string; appCode?: string; level?: string; messages?: Record<string, string> }): LogTemplate {
   return {
     id: r.id,
     logCode: r.logCode ?? '',
     appCode: r.appCode ?? '',
+    level: (r.level as LogLevel) ?? 'INFO',
     messages: r.messages ?? {},
   };
 }

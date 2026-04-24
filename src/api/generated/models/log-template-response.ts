@@ -18,6 +18,18 @@ export interface LogTemplateResponse {
     'id'?: string;
     'logCode'?: string;
     'appCode'?: string;
+    'level'?: LogTemplateResponseLevelEnum;
     'messages'?: { [key: string]: string; };
 }
+
+export const LogTemplateResponseLevelEnum = {
+    Trace: 'TRACE',
+    Debug: 'DEBUG',
+    Info: 'INFO',
+    Warn: 'WARN',
+    Error: 'ERROR',
+} as const;
+
+export type LogTemplateResponseLevelEnum = typeof LogTemplateResponseLevelEnum[keyof typeof LogTemplateResponseLevelEnum];
+
 
