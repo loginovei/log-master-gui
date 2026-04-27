@@ -57,6 +57,7 @@ export const translations = {
       recentShow: 'Показывать',
       refresh: 'Обновить',
       searchTitle: 'Поиск по шаблону',
+      templateNotFound: 'не найден шаблон',
     },
     templates: {
       title: 'Шаблоны логов',
@@ -177,6 +178,7 @@ export const translations = {
       recentShow: 'Show',
       refresh: 'Refresh',
       searchTitle: 'Search by template',
+      templateNotFound: 'template not found',
     },
     templates: {
       title: 'Log templates',
@@ -297,6 +299,7 @@ export const translations = {
       recentShow: '显示',
       refresh: '刷新',
       searchTitle: '按模板搜索',
+      templateNotFound: '未找到模板',
     },
     templates: {
       title: '日志模板',

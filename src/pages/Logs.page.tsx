@@ -127,7 +127,9 @@ export function LogsPage() {
       dataIndex: 'params',
       render: (params: Record<string, unknown>, record: LogEntry) => {
         const tpl = templateMap[record.logCode];
-        return tpl ? renderMessage(tpl, params, selectedLang) : record.logCode;
+        return tpl
+          ? renderMessage(tpl, params, selectedLang)
+          : <Text type="secondary" italic>{t.logs.templateNotFound} {record.logCode}</Text>;
       },
     },
     {
@@ -197,8 +199,13 @@ export function LogsPage() {
     },
     message: {
       key: 'message', title: t.logs.colMessage, dataIndex: 'params',
-      render: (params: Record<string, unknown>) =>
-        selectedTemplate ? renderMessage(selectedTemplate, params, selectedLang) : '—',
+      render: (params: Record<string, unknown>, record: LogEntry) => {
+        if (selectedTemplate) return renderMessage(selectedTemplate, params, selectedLang);
+        const tpl = templateMap[record.logCode];
+        return tpl
+          ? renderMessage(tpl, params, selectedLang)
+          : <Text type="secondary" italic>{t.logs.templateNotFound} {record.logCode}</Text>;
+      },
       onHeaderCell: draggableHeader('message'),
     },
   };
