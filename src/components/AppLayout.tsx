@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layout, Menu, Select, Space, Typography } from 'antd';
+import { Button, Layout, Menu, Select, Space, Typography, theme as antTheme } from 'antd';
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -7,6 +7,8 @@ import {
   BarChartOutlined,
   AppstoreAddOutlined,
   GlobalOutlined,
+  MoonOutlined,
+  SunOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useAppContext } from '../context/AppContext';
@@ -25,7 +27,8 @@ export function AppLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const { apps, selectedApp, setSelectedApp, selectedLang, setSelectedLang } = useAppContext();
+  const { apps, selectedApp, setSelectedApp, selectedLang, setSelectedLang, isDark, toggleTheme } = useAppContext();
+  const { token } = antTheme.useToken();
   const t = useT();
 
   const siderWidth = collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH;
@@ -65,12 +68,12 @@ export function AppLayout() {
 
       <Layout style={{ marginLeft: siderWidth, transition: 'margin-left 0.2s' }}>
         <Header style={{
-          background: '#fff',
+          background: token.colorBgContainer,
           padding: '0 24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid #f0f0f0',
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
           position: 'sticky',
           top: 0,
           zIndex: 99,
@@ -99,10 +102,15 @@ export function AppLayout() {
               onChange={setSelectedLang}
               options={LANG_OPTIONS}
             />
+            <Button
+              type="text"
+              icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+              onClick={toggleTheme}
+            />
           </Space>
         </Header>
 
-        <Content style={{ padding: 24, minHeight: 'calc(100vh - 64px)', background: '#f5f5f5' }}>
+        <Content style={{ padding: 24, minHeight: 'calc(100vh - 64px)', background: token.colorBgLayout }}>
           <Outlet />
         </Content>
       </Layout>

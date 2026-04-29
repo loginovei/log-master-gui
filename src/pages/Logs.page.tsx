@@ -18,6 +18,7 @@ import {
   Tag,
   Tooltip,
   Typography,
+  theme as antTheme,
 } from 'antd';
 import {
   BugOutlined,
@@ -53,6 +54,7 @@ function renderMessage(template: LogTemplate, params: Record<string, unknown>, l
 
 export function LogsPage() {
   const { apps, selectedApp, selectedLang } = useAppContext();
+  const { token } = antTheme.useToken();
   const t = useT();
   const dateLocale = DATE_LOCALE[selectedLang] ?? 'ru-RU';
 
@@ -469,7 +471,7 @@ export function LogsPage() {
               label: t.logs.params,
               children: (
                 <pre style={{
-                  margin: 0, padding: '12px 16px', background: '#f6f8fa',
+                  margin: 0, padding: '12px 16px', background: token.colorFillQuaternary,
                   borderRadius: 6, fontSize: 13, lineHeight: 1.6,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace',
                 }}>
@@ -482,7 +484,7 @@ export function LogsPage() {
               label: t.logs.context,
               children: (
                 <pre style={{
-                  margin: 0, padding: '12px 16px', background: '#f6f8fa',
+                  margin: 0, padding: '12px 16px', background: token.colorFillQuaternary,
                   borderRadius: 6, fontSize: 13, lineHeight: 1.6,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace',
                 }}>

@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
-import { AppProvider } from './context/AppContext';
+import { ConfigProvider, theme } from 'antd';
+import { AppProvider, useAppContext } from './context/AppContext';
 import { AppLayout } from './components/AppLayout';
 import { DashboardPage } from './pages/Dashboard.page';
 import { LogsPage } from './pages/Logs.page';
@@ -21,10 +22,19 @@ const router = createBrowserRouter([
   },
 ]);
 
+function ThemedApp() {
+  const { isDark } = useAppContext();
+  return (
+    <ConfigProvider theme={{ algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm }}>
+      <RouterProvider router={router} />
+    </ConfigProvider>
+  );
+}
+
 export default function App() {
   return (
     <AppProvider>
-      <RouterProvider router={router} />
+      <ThemedApp />
     </AppProvider>
   );
 }
