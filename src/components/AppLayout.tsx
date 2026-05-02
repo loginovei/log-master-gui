@@ -85,6 +85,11 @@ export function AppLayout() {
               style={{ width: 240 }}
               placeholder={t.header.appPlaceholder}
               allowClear
+              showSearch
+              filterOption={(input, option) =>
+                String(option?.label ?? '').toLowerCase().includes(input.toLowerCase()) ||
+                String(option?.value ?? '').toLowerCase().includes(input.toLowerCase())
+              }
               value={selectedApp?.code ?? null}
               onChange={(code) => {
                 setSelectedApp(code ? (apps.find(a => a.code === code) ?? null) : null);
