@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   Col,
-  DatePicker,
   Divider,
   Form,
   Input,
@@ -36,7 +35,15 @@ import { useT } from '../i18n/useT';
 import type { LogEntry, LogLevel, LogSearchParams, LogTemplate, Page } from '../types';
 
 const { Title, Text } = Typography;
-const { RangePicker } = DatePicker;
+
+const PERIOD_OPTIONS = [
+  { value: '1h',  ms: 60 * 60 * 1000 },
+  { value: '1d',  ms: 24 * 60 * 60 * 1000 },
+  { value: '3d',  ms: 3 * 24 * 60 * 60 * 1000 },
+  { value: '7d',  ms: 7 * 24 * 60 * 60 * 1000 },
+] as const;
+
+type PeriodValue = typeof PERIOD_OPTIONS[number]['value'];
 
 const levelColors: Record<LogLevel, string> = {
   TRACE: 'default', DEBUG: 'blue', INFO: 'success', WARN: 'warning', ERROR: 'error',
@@ -83,7 +90,7 @@ export function LogsPage() {
   const [templateQuery, setTemplateQuery] = useState('');
   const [templateOptions, setTemplateOptions] = useState<{ value: string; label: string; template: LogTemplate }[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<LogTemplate | null>(null);
-  const [filters, setFilters] = useState<{ service?: string; level?: LogLevel; from?: string; to?: string }>({});
+  const [filters, setFilters] = useState<{ service?: string; level?: LogLevel; period?: PeriodValue }>({});
   const [logs, setLogs] = useState<Page<LogEntry> | null>(null);
   const [logsLoading, setLogsLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -258,7 +265,18 @@ export function LogsPage() {
     setLogsLoading(true);
     setSearched(true);
     try {
-      const params: LogSearchParams = { appCode: selectedApp?.code, logCode, ...filters, page: currentPage - 1, size: 20 };
+      const periodMs = filters.period ? PERIOD_OPTIONS.find(p => p.value === filters.period)?.ms : undefined;
+      const now = Date.now();
+      const params: LogSearchParams = {
+        appCode: selectedApp?.code,
+        logCode,
+        service: filters.service,
+        level: filters.level,
+        from: periodMs ? new Date(now - periodMs).toISOString() : undefined,
+        to: periodMs ? new Date(now).toISOString() : undefined,
+        page: currentPage - 1,
+        size: 20,
+      };
       setLogs(await searchLogs(params));
     } catch { setLogs(null); }
     finally { setLogsLoading(false); }
@@ -379,10 +397,20 @@ export function LogsPage() {
                 />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={6}>
               <Form.Item label={t.logs.period} style={{ margin: 0 }}>
-                <RangePicker showTime style={{ width: '100%' }}
-                  onChange={(_, [from, to]) => setFilters(f => ({ ...f, from, to }))} />
+                <Select
+                  allowClear
+                  placeholder={t.logs.allPeriods}
+                  style={{ width: '100%' }}
+                  onChange={(v) => setFilters(f => ({ ...f, period: v }))}
+                  options={[
+                    { value: '1h', label: t.logs.period1h },
+                    { value: '1d', label: t.logs.period1d },
+                    { value: '3d', label: t.logs.period3d },
+                    { value: '7d', label: t.logs.period7d },
+                  ]}
+                />
               </Form.Item>
             </Col>
           </Row>
