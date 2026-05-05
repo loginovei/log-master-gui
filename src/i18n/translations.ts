@@ -63,6 +63,7 @@ export const translations = {
       period1d: 'Последние сутки',
       period3d: 'Последние 3 дня',
       period7d: 'Последняя неделя',
+      periodCustom: 'Указать интервал',
     },
     templates: {
       title: 'Шаблоны логов',
@@ -189,6 +190,7 @@ export const translations = {
       period1d: 'Last 24 hours',
       period3d: 'Last 3 days',
       period7d: 'Last week',
+      periodCustom: 'Custom range',
     },
     templates: {
       title: 'Log templates',
@@ -315,6 +317,7 @@ export const translations = {
       period1d: '最近一天',
       period3d: '最近三天',
       period7d: '最近一周',
+      periodCustom: '自定义范围',
     },
     templates: {
       title: '日志模板',

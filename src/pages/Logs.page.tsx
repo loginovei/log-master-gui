@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Col,
+  DatePicker,
   Divider,
   Form,
   Input,
@@ -19,6 +20,8 @@ import {
   Typography,
   theme as antTheme,
 } from 'antd';
+
+const { RangePicker } = DatePicker;
 import {
   BugOutlined,
   CodeOutlined,
@@ -43,7 +46,7 @@ const PERIOD_OPTIONS = [
   { value: '7d',  ms: 7 * 24 * 60 * 60 * 1000 },
 ] as const;
 
-type PeriodValue = typeof PERIOD_OPTIONS[number]['value'];
+type PeriodValue = typeof PERIOD_OPTIONS[number]['value'] | 'custom';
 
 const levelColors: Record<LogLevel, string> = {
   TRACE: 'default', DEBUG: 'blue', INFO: 'success', WARN: 'warning', ERROR: 'error',
@@ -91,6 +94,7 @@ export function LogsPage() {
   const [templateOptions, setTemplateOptions] = useState<{ value: string; label: string; template: LogTemplate }[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<LogTemplate | null>(null);
   const [filters, setFilters] = useState<{ service?: string; level?: LogLevel; period?: PeriodValue }>({});
+  const [customRange, setCustomRange] = useState<[string, string] | null>(null);
   const [logs, setLogs] = useState<Page<LogEntry> | null>(null);
   const [logsLoading, setLogsLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -265,15 +269,22 @@ export function LogsPage() {
     setLogsLoading(true);
     setSearched(true);
     try {
-      const periodMs = filters.period ? PERIOD_OPTIONS.find(p => p.value === filters.period)?.ms : undefined;
-      const now = Date.now();
+      let from: string | undefined;
+      let to: string | undefined;
+      if (filters.period === 'custom') {
+        from = customRange?.[0];
+        to = customRange?.[1];
+      } else if (filters.period) {
+        const ms = PERIOD_OPTIONS.find(p => p.value === filters.period)?.ms;
+        if (ms) { const now = Date.now(); from = new Date(now - ms).toISOString(); to = new Date(now).toISOString(); }
+      }
       const params: LogSearchParams = {
         appCode: selectedApp?.code,
         logCode,
         service: filters.service,
         level: filters.level,
-        from: periodMs ? new Date(now - periodMs).toISOString() : undefined,
-        to: periodMs ? new Date(now).toISOString() : undefined,
+        from,
+        to,
         page: currentPage - 1,
         size: 20,
       };
@@ -403,16 +414,32 @@ export function LogsPage() {
                   allowClear
                   placeholder={t.logs.allPeriods}
                   style={{ width: '100%' }}
-                  onChange={(v) => setFilters(f => ({ ...f, period: v }))}
+                  value={filters.period ?? null}
+                  onChange={(v) => {
+                    setFilters(f => ({ ...f, period: v }));
+                    if (v !== 'custom') setCustomRange(null);
+                  }}
                   options={[
-                    { value: '1h', label: t.logs.period1h },
-                    { value: '1d', label: t.logs.period1d },
-                    { value: '3d', label: t.logs.period3d },
-                    { value: '7d', label: t.logs.period7d },
+                    { value: '1h',     label: t.logs.period1h },
+                    { value: '1d',     label: t.logs.period1d },
+                    { value: '3d',     label: t.logs.period3d },
+                    { value: '7d',     label: t.logs.period7d },
+                    { value: 'custom', label: t.logs.periodCustom },
                   ]}
                 />
               </Form.Item>
             </Col>
+            {filters.period === 'custom' && (
+              <Col span={24}>
+                <Form.Item style={{ margin: 0 }}>
+                  <RangePicker
+                    showTime
+                    style={{ width: '100%' }}
+                    onChange={(_, [from, to]) => setCustomRange(from && to ? [from, to] : null)}
+                  />
+                </Form.Item>
+              </Col>
+            )}
           </Row>
         </Form>
       </Card>
