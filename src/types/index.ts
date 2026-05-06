@@ -34,11 +34,12 @@ export interface Page<T> {
 
 export interface LogSearchParams {
   appCode?: string;
-  logCode?: string;
+  logCodes?: string[];
   service?: string;
   level?: LogLevel;
   from?: string;
   to?: string;
+  argsQuery?: string;
   page?: number;
   size?: number;
 }

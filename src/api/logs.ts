@@ -1,17 +1,21 @@
 import { logsApi } from './apiClient';
+import client from './client';
 import type { AppStats, LogEntry, LogLevel, LogSearchParams, Page } from '../types';
 
 export async function searchLogs(params: LogSearchParams): Promise<Page<LogEntry>> {
-  const effectiveAppCode = params.appCode ?? params.service;
-  const { data } = await logsApi.search1(
-    effectiveAppCode,
-    params.logCode,
-    params.level,
-    params.from,
-    params.to,
-    params.page,
-    params.size,
-  );
+  const { data } = await client.get('/api/logs', {
+    params: {
+      appCode: params.appCode,
+      logCodes: params.logCodes,
+      level: params.level,
+      from: params.from,
+      to: params.to,
+      argsQuery: params.argsQuery || undefined,
+      page: params.page ?? 0,
+      size: params.size ?? 20,
+    },
+    paramsSerializer: { indexes: null },
+  });
   return {
     content: data.content?.map(toEntry) ?? [],
     totalElements: data.totalElements ?? 0,

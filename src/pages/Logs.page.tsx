@@ -75,6 +75,16 @@ export function LogsPage() {
   useEffect(() => { setRecentPage(1); }, [selectedApp?.code]);
   useEffect(() => { setRecentPage(1); }, [recentSize]);
 
+  useEffect(() => {
+    setSelectedTemplates([]);
+    setFilters({});
+    setCustomRange(null);
+    setArgsQuery('');
+    setLogs(null);
+    setSearched(false);
+    setPage(1);
+  }, [selectedApp?.code]);
+
   const { data: templatesPage } = useFetch(
     () => getTemplates({ appCode: selectedApp?.code, size: 500 }),
     [selectedApp?.code],
@@ -92,9 +102,10 @@ export function LogsPage() {
   // ── Template search + filtered logs ───────────────────────────────────────
   const [templateQuery, setTemplateQuery] = useState('');
   const [templateOptions, setTemplateOptions] = useState<{ value: string; label: string; template: LogTemplate }[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<LogTemplate | null>(null);
+  const [selectedTemplates, setSelectedTemplates] = useState<LogTemplate[]>([]);
   const [filters, setFilters] = useState<{ service?: string; level?: LogLevel; period?: PeriodValue }>({});
   const [customRange, setCustomRange] = useState<[string, string] | null>(null);
+  const [argsQuery, setArgsQuery] = useState('');
   const [logs, setLogs] = useState<Page<LogEntry> | null>(null);
   const [logsLoading, setLogsLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -213,7 +224,6 @@ export function LogsPage() {
     message: {
       key: 'message', title: t.logs.colMessage, dataIndex: 'params',
       render: (params: Record<string, unknown>, record: LogEntry) => {
-        if (selectedTemplate) return renderMessage(selectedTemplate, params, selectedLang);
         const tpl = templateMap[record.logCode];
         return tpl
           ? renderMessage(tpl, params, selectedLang)
@@ -265,7 +275,7 @@ export function LogsPage() {
     }, 300);
   }, [templateQuery, selectedLang, selectedApp?.code]);
 
-  async function loadLogs(logCode: string, currentPage: number) {
+  async function loadLogs(currentPage: number) {
     setLogsLoading(true);
     setSearched(true);
     try {
@@ -280,9 +290,10 @@ export function LogsPage() {
       }
       const params: LogSearchParams = {
         appCode: selectedApp?.code,
-        logCode,
+        logCodes: selectedTemplates.length > 0 ? selectedTemplates.map(t => t.logCode) : undefined,
         service: filters.service,
         level: filters.level,
+        argsQuery: argsQuery.trim() || undefined,
         from,
         to,
         page: currentPage - 1,
@@ -295,23 +306,25 @@ export function LogsPage() {
 
   function handleSelectTemplate(value: string) {
     const opt = templateOptions.find(o => o.value === value);
-    if (opt) { setSelectedTemplate(opt.template); setPage(1); }
+    if (opt && !selectedTemplates.find(t => t.logCode === opt.template.logCode)) {
+      setSelectedTemplates(prev => [...prev, opt.template]);
+    }
+    setTemplateQuery('');
+    setTemplateOptions([]);
+  }
+
+  function handleRemoveTemplate(logCode: string) {
+    setSelectedTemplates(prev => prev.filter(t => t.logCode !== logCode));
   }
 
   function handleSearch() {
-    if (selectedTemplate) {
-      setPage(1);
-      loadLogs(selectedTemplate.logCode, 1);
-    } else if (templateQuery.trim()) {
-      setPage(1);
-      loadLogs(templateQuery.trim(), 1);
-    }
+    setPage(1);
+    loadLogs(1);
   }
 
   function handleApplyFilters() {
-    if (!selectedTemplate) return;
     setPage(1);
-    loadLogs(selectedTemplate.logCode, 1);
+    loadLogs(1);
   }
 
   const expandable = {
@@ -343,7 +356,6 @@ export function LogsPage() {
             onClick={handleApplyFilters}
             type="primary"
             ghost
-            disabled={!selectedTemplate}
           >
             {t.logs.applyFilters}
           </Button>
@@ -370,14 +382,20 @@ export function LogsPage() {
           </Button>
         </Space.Compact>
 
-        {selectedTemplate && (
+        {selectedTemplates.length > 0 && (
           <>
-            <Divider style={{ margin: '12px 0' }} />
-            <Space wrap>
-              <Text strong>{t.logs.selectedTemplate}</Text>
-              <Tag color="blue">{selectedTemplate.logCode}</Tag>
-              {Object.entries(selectedTemplate.messages).map(([lang, text]) => (
-                <Tag key={lang}><Text type="secondary">[{lang}]</Text> {text}</Tag>
+            <Divider style={{ margin: '10px 0 6px' }} />
+            <Space size={4} wrap>
+              <Text type="secondary" style={{ fontSize: 12 }}>{t.logs.selectedTemplate}</Text>
+              {selectedTemplates.map(tmpl => (
+                <Tag
+                  key={tmpl.logCode}
+                  color="blue"
+                  closable
+                  onClose={() => handleRemoveTemplate(tmpl.logCode)}
+                >
+                  {tmpl.logCode}
+                </Tag>
               ))}
             </Space>
           </>
@@ -429,6 +447,17 @@ export function LogsPage() {
                 />
               </Form.Item>
             </Col>
+            <Col span={6}>
+              <Form.Item label={t.logs.argsQuery} style={{ margin: 0 }}>
+                <Input
+                  placeholder={t.logs.argsQueryPlaceholder}
+                  value={argsQuery}
+                  onChange={e => setArgsQuery(e.target.value)}
+                  allowClear
+                  onPressEnter={handleApplyFilters}
+                />
+              </Form.Item>
+            </Col>
             {filters.period === 'custom' && (
               <Col span={24}>
                 <Form.Item style={{ margin: 0 }}>
@@ -460,7 +489,7 @@ export function LogsPage() {
               total: logs?.totalElements ?? 0,
               pageSize: 20,
               showTotal: (total) => `${t.logs.total}: ${total}`,
-              onChange: (p) => { setPage(p); if (selectedTemplate) loadLogs(selectedTemplate.logCode, p); },
+              onChange: (p) => { setPage(p); loadLogs(p); },
             }}
           />
         </Card>
