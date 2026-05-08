@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Log Master API
  * API системы централизованного хранения и поиска логов

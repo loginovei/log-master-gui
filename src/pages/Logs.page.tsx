@@ -72,19 +72,6 @@ export function LogsPage() {
   const [recentSize, setRecentSize] = useState(25);
   const [recentPage, setRecentPage] = useState(1);
 
-  useEffect(() => { setRecentPage(1); }, [selectedApp?.code]);
-  useEffect(() => { setRecentPage(1); }, [recentSize]);
-
-  useEffect(() => {
-    setSelectedTemplates([]);
-    setFilters({});
-    setCustomRange(null);
-    setArgsQuery('');
-    setLogs(null);
-    setSearched(false);
-    setPage(1);
-  }, [selectedApp?.code]);
-
   const { data: templatesPage } = useFetch(
     () => getTemplates({ appCode: selectedApp?.code, size: 500 }),
     [selectedApp?.code],
@@ -115,6 +102,19 @@ export function LogsPage() {
   const [colOrder, setColOrder] = useState<string[]>(DEFAULT_COL_ORDER);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dragKey = useRef<string>('');
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setRecentPage(1);
+    setSelectedTemplates([]);
+    setFilters({});
+    setCustomRange(null);
+    setArgsQuery('');
+    setLogs(null);
+    setSearched(false);
+    setPage(1);
+  }, [selectedApp?.code]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function toggleExpand(id: string) {
     setExpandedKeys(keys => keys.includes(id) ? keys.filter(k => k !== id) : [...keys, id]);
@@ -183,6 +183,7 @@ export function LogsPage() {
   ];
 
   // ── Draggable search-result columns ───────────────────────────────────────
+  /* eslint-disable react-hooks/refs */
   function draggableHeader(key: string): ColumnType<LogEntry>['onHeaderCell'] {
     return () => ({
       draggable: true,
@@ -201,6 +202,7 @@ export function LogsPage() {
       },
     });
   }
+  /* eslint-enable react-hooks/refs */
 
   const colDefs: Record<string, ColumnType<LogEntry>> = {
     time: {
@@ -261,7 +263,7 @@ export function LogsPage() {
 
   // ── Template autocomplete ─────────────────────────────────────────────────
   useEffect(() => {
-    if (!templateQuery.trim()) { setTemplateOptions([]); return; }
+    if (!templateQuery.trim()) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
@@ -274,6 +276,8 @@ export function LogsPage() {
       } catch { /* игнорируем */ }
     }, 300);
   }, [templateQuery, selectedLang, selectedApp?.code]);
+
+  const visibleTemplateOptions = templateQuery.trim() ? templateOptions : [];
 
   async function loadLogs(currentPage: number) {
     setLogsLoading(true);
@@ -368,7 +372,7 @@ export function LogsPage() {
             value={templateQuery}
             onChange={setTemplateQuery}
             onSelect={handleSelectTemplate}
-            options={templateOptions.map(o => ({ value: o.value, label: o.label }))}
+            options={visibleTemplateOptions.map(o => ({ value: o.value, label: o.label }))}
             notFoundContent={templateQuery.trim() ? t.templates.noTemplates : null}
             allowClear
           >
