@@ -5,7 +5,7 @@ import type { AppStats, LogEntry, LogLevel, LogSearchParams, Page } from '../typ
 export async function searchLogs(params: LogSearchParams): Promise<Page<LogEntry>> {
   const { data } = await client.get('/api/logs', {
     params: {
-      appCode: params.appCode,
+      appCode: params.appCode ?? params.service,
       logCodes: params.logCodes,
       level: params.level,
       from: params.from,
