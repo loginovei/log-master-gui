@@ -78,7 +78,7 @@ export function TemplatesPage() {
     const values = await form.validateFields();
     setSaving(true);
     try {
-      const payload = { logCode: values.logCode, appCode: selectedApp?.code ?? '', level: values.level, messages: toRecord(values.messages) };
+      const payload = { logCode: values.logCode, appCode: editing ? editing.appCode : (selectedApp?.code ?? ''), level: values.level, messages: toRecord(values.messages) };
       if (editing) {
         await updateTemplate(editing.logCode, payload);
         message.success(t.templates.saved);
