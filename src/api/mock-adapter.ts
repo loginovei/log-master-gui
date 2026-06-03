@@ -11,15 +11,15 @@ const APPLICATIONS: Application[] = [
 ];
 
 const TEMPLATES: LogTemplate[] = [
-  { id: '1', appCode: 'auth-service',  logCode: 'AUTH_001', messages: { ru: 'Пользователь {0} успешно вошёл в систему',        en: 'User {0} logged in successfully' } },
-  { id: '2', appCode: 'auth-service',  logCode: 'AUTH_002', messages: { ru: 'Неудачная попытка входа для пользователя {0}',     en: 'Failed login attempt for user {0}' } },
-  { id: '3', appCode: 'auth-service',  logCode: 'AUTH_003', messages: { ru: 'Пользователь {0} вышел из системы',                en: 'User {0} logged out' } },
-  { id: '4', appCode: 'user-service',  logCode: 'USER_001', messages: { ru: 'Создан новый пользователь: {0}',                   en: 'New user created: {0}' } },
-  { id: '5', appCode: 'user-service',  logCode: 'USER_002', messages: { ru: 'Профиль пользователя {0} обновлён',                en: 'User profile {0} updated' } },
-  { id: '6', appCode: 'order-service', logCode: 'ORD_001',  messages: { ru: 'Заказ {0} создан пользователем {1}',               en: 'Order {0} created by user {1}' } },
-  { id: '7', appCode: 'order-service', logCode: 'ORD_002',  messages: { ru: 'Ошибка обработки заказа {0}: {1}',                 en: 'Order {0} processing error: {1}' } },
-  { id: '8', appCode: 'api-gateway',   logCode: 'GW_001',   messages: { ru: 'Запрос {0} {1} завершён со статусом {2} за {3} мс', en: 'Request {0} {1} completed with status {2} in {3} ms' } },
-  { id: '9', appCode: 'api-gateway',   logCode: 'GW_002',   messages: { ru: 'Превышен лимит запросов для {0}',                  en: 'Rate limit exceeded for {0}' } },
+  { id: '1', appCode: 'auth-service',  logCode: 'AUTH_001', level: 'INFO',  messages: { ru: 'Пользователь {0} успешно вошёл в систему',        en: 'User {0} logged in successfully' } },
+  { id: '2', appCode: 'auth-service',  logCode: 'AUTH_002', level: 'WARN',  messages: { ru: 'Неудачная попытка входа для пользователя {0}',     en: 'Failed login attempt for user {0}' } },
+  { id: '3', appCode: 'auth-service',  logCode: 'AUTH_003', level: 'INFO',  messages: { ru: 'Пользователь {0} вышел из системы',                en: 'User {0} logged out' } },
+  { id: '4', appCode: 'user-service',  logCode: 'USER_001', level: 'INFO',  messages: { ru: 'Создан новый пользователь: {0}',                   en: 'New user created: {0}' } },
+  { id: '5', appCode: 'user-service',  logCode: 'USER_002', level: 'INFO',  messages: { ru: 'Профиль пользователя {0} обновлён',                en: 'User profile {0} updated' } },
+  { id: '6', appCode: 'order-service', logCode: 'ORD_001',  level: 'INFO',  messages: { ru: 'Заказ {0} создан пользователем {1}',               en: 'Order {0} created by user {1}' } },
+  { id: '7', appCode: 'order-service', logCode: 'ORD_002',  level: 'ERROR', messages: { ru: 'Ошибка обработки заказа {0}: {1}',                 en: 'Order {0} processing error: {1}' } },
+  { id: '8', appCode: 'api-gateway',   logCode: 'GW_001',   level: 'INFO',  messages: { ru: 'Запрос {0} {1} завершён со статусом {2} за {3} мс', en: 'Request {0} {1} completed with status {2} in {3} ms' } },
+  { id: '9', appCode: 'api-gateway',   logCode: 'GW_002',   level: 'WARN',  messages: { ru: 'Превышен лимит запросов для {0}',                  en: 'Rate limit exceeded for {0}' } },
 ];
 
 const ENTRIES: LogEntry[] = [
